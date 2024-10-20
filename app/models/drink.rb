@@ -5,8 +5,13 @@ class Drink < ApplicationRecord
   has_many :settlement_prices
 
   def price_in_cents_at(date:)
-    settlement_prices.find_by(valid_from: Range.new(date, nil))&.price_in_cents
+    settlement_price(date:)&.price_in_cents || price_in_cents
+  end
+
+  def settlement_price(date:)
+    settlement_prices.order(valid_from: :desc).find_by(valid_from: Range.new(nil, date))
   end
 
   def current_price_in_cents = price_in_cents_at(date: Date.today)
+  def current_settlement_price = settlement_price(date: Date.today)
 end
