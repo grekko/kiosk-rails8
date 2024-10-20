@@ -2,7 +2,6 @@ CREATE TABLE IF NOT EXISTS "schema_migrations" ("version" varchar NOT NULL PRIMA
 CREATE TABLE IF NOT EXISTS "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
 CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
 CREATE TABLE IF NOT EXISTS "orders" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "ordered_at" date NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
-CREATE TABLE IF NOT EXISTS "drinks" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
 CREATE TABLE IF NOT EXISTS "order_positions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "order_id" integer NOT NULL, "drink_id" integer NOT NULL, "amount" integer DEFAULT 0 NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "deposit_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "total_price_in_cents"  GENERATED ALWAYS AS (price_in_cents + deposit_in_cents) VIRTUAL /*application='Kiosk'*/, CONSTRAINT "fk_rails_7dbe8a92c4"
 FOREIGN KEY ("drink_id")
   REFERENCES "drinks" ("id")
@@ -26,6 +25,7 @@ FOREIGN KEY ("drink_id")
 );
 CREATE INDEX "index_settlement_positions_on_settlement_id" ON "settlement_positions" ("settlement_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlement_positions_on_drink_id" ON "settlement_positions" ("drink_id") /*application='Kiosk'*/;
+CREATE TABLE IF NOT EXISTS "drinks" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
 INSERT INTO "schema_migrations" (version) VALUES
 ('20241020183615'),
 ('20241020181935'),
