@@ -1,0 +1,13 @@
+h1 Clients
+
+= link_to "New client", new_client_path
+
+table#clients
+  thead
+    th Name
+    th Actions
+  tbody
+    - @clients.each do |client|
+      tr
+        td= client.name
+        td= link_to "Edit", edit_client_path(client)
