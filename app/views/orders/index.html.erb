@@ -1,0 +1,17 @@
+<h1>Orders</h1>
+
+<%= link_to "New order", new_order_path %>
+
+<table id="orders">
+  <thead>
+    <th>Date</th>
+    <th>Actions</th>
+  </thead>
+  <tbody>
+  <% @orders.each do |order| %>
+    <tr>
+      <td><%= l(order.ordered_at) %></td>
+      <td><%= link_to "Edit", edit_order_path(order) %></td>
+    </tr>
+  <% end %>
+</table>
