@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_action :set_order, only: %i[ show edit update destroy ]
+  before_action :set_order, only: %i[ edit update destroy ]
 
   def index
     @orders = Order.all
@@ -24,7 +24,7 @@ class OrdersController < ApplicationController
 
   def update
     if @order.update(order_params)
-      redirect_to @order, notice: "Order was successfully updated.", status: :see_other
+      redirect_to orders_path, notice: "Order was successfully updated.", status: :see_other
     else
       render :edit, status: :unprocessable_entity
     end

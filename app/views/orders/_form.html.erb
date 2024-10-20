@@ -1,22 +1,4 @@
-<%= form_with(model: order) do |form| %>
-  <% if order.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(order.errors.count, "error") %> prohibited this order from being saved:</h2>
-
-      <ul>
-        <% order.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div>
-    <%= form.label :ordered_at, style: "display: block" %>
-    <%= form.date_field :ordered_at %>
-  </div>
-
-  <div>
-    <%= form.submit %>
-  </div>
+<%= simple_form_for order do |form| %>
+  <%= form.input :ordered_at, html5: true %>
+  <%= form.button :submit %>
 <% end %>
