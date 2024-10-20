@@ -1,0 +1,25 @@
+h1 Orders
+
+= link_to "New order", new_order_path
+
+table#orders
+  thead
+    th Date
+    th Price
+    th Deposit
+    th Total
+    th Actions
+  tbody
+    - @orders.each do |order|
+      tr
+        td= l(order.ordered_at)
+        td= formatted_price(order.price_in_cents)
+        td= formatted_price(order.deposit_in_cents)
+        td= formatted_price(order.total_price_in_cents)
+        td= link_to "Edit", edit_order_path(order)
+
+    tr
+      td
+      td: strong= formatted_price(@orders.sum(&:price_in_cents))
+      td: strong= formatted_price(@orders.sum(&:deposit_in_cents))
+      td: strong= formatted_price(@orders.sum(&:total_price_in_cents))

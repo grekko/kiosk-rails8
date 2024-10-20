@@ -15,20 +15,18 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
 
   <body>
     <nav>
       <ol>
         <li><%= link_to "Clients", clients_path %></li>
+        <li><%= link_to "Drinks", drinks_path %></li>
         <li><%= link_to "Orders", orders_path %></li>
       </ol>
     </nav>
     <main>
-      <% if flash.any? %>
-      <p style="color: green"><%= notice %></p>
-      <% end %>
-
       <%= yield %>
     </main>
   </body>

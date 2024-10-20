@@ -1,0 +1,6 @@
+= simple_form_for order_position, url: order_position_path(order_position.order) do |form|
+  = form.input :amount
+  = form.input :price_in_cents
+  = form.input :deposit_in_cents
+
+  = form.button :submit

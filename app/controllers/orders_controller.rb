@@ -16,7 +16,7 @@ class OrdersController < ApplicationController
     @order = Order.new(order_params)
 
     if @order.save
-      redirect_to edit_order_path(@order), notice: "Order was successfully created."
+      redirect_to edit_order_path(@order)
     else
       render :new, status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class OrdersController < ApplicationController
 
   def update
     if @order.update(order_params)
-      redirect_to orders_path, notice: "Order was successfully updated.", status: :see_other
+      redirect_to orders_path
     else
       render :edit, status: :unprocessable_entity
     end
@@ -32,13 +32,13 @@ class OrdersController < ApplicationController
 
   def destroy
     @order.destroy!
-    redirect_to orders_path, notice: "Order was successfully destroyed.", status: :see_other
+    redirect_to orders_path
   end
 
   private
 
   def set_order
-    @order = Order.find(params.expect(:id))
+    @order = Order.includes(positions: [ :drink ]).find(params.expect(:id))
   end
 
   def order_params

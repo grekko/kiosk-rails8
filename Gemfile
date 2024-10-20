@@ -11,6 +11,7 @@ gem "propshaft" # The modern asset pipeline for Rails [https://github.com/rails/
 gem "simple_form" # Rails forms made easy.
 gem "stimulus-rails" # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "turbo-rails" # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
+gem "slim-rails"
 
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

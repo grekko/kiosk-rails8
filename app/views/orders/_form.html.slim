@@ -1,0 +1,40 @@
+= simple_form_for order do |form|
+  = form.input :ordered_at, html5: true
+  = form.button :submit
+
+h2 Positions
+
+table#positions
+  thead
+    th Drink
+    th Amount
+    th Price
+    th Deposit
+    th Total
+    th Actions
+  tbody
+    - order.positions.each do |position|
+      tr
+        td= position.drink.name
+        td= position.amount
+        td= formatted_price(position.price_in_cents)
+        td= formatted_price(position.deposit_in_cents)
+        td= formatted_price(position.total_price_in_cents)
+        td
+          = button_to "Delete", order_position_path(position.order, position), method: :delete
+    tr
+      td
+      td
+      td: strong= formatted_price(order.price_in_cents)
+      td: strong= formatted_price(order.deposit_in_cents)
+      td: strong= formatted_price(order.total_price_in_cents)
+
+h2 Add Position
+
+= simple_form_for :order_position, url: order_positions_path(order), method: :post do |form|
+  = form.input :drink_id, collection: Drink.all
+  = form.input :amount, collection: 1..30
+  = form.input :price_in_cents
+  = form.input :deposit_in_cents
+
+  = form.button :submit, "Create"
