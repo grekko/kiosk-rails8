@@ -5,6 +5,9 @@ html
     meta name="viewport" content="width=device-width,initial-scale=1"
     meta name="apple-mobile-web-app-capable" content="yes"
     meta name="mobile-web-app-capable" content="yes"
+    meta name="color-scheme" content="light dark"
+    link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css"
+
     = csrf_meta_tags
     = csp_meta_tag
 
@@ -18,12 +21,13 @@ html
     = javascript_importmap_tags
 
   body
-    nav
-      ol
-        li= link_to "Inventory", root_path
-        li= link_to "Clients", clients_path
-        li= link_to "Drinks", drinks_path
-        li= link_to "Orders", orders_path
-        li= link_to "Settlements", settlements_path
+    header
+      nav
+        ol
+          li= link_to "Inventory", root_path
+          li= link_to "Clients", clients_path
+          li= link_to "Drinks", drinks_path
+          li= link_to "Orders", orders_path
+          li= link_to "Settlements", settlements_path
 
     main= yield
