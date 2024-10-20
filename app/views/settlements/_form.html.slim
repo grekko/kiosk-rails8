@@ -1,5 +1,5 @@
 = simple_form_for settlement do |form|
-  = form.input :client_id, collection: Client.all
+  = form.input :client_id, collection: Client.all, include_blank: false
   = form.input :generated_at, html5: true
   = form.button :submit
 
@@ -15,12 +15,10 @@
     tbody
       - settlement.positions.each do |position|
         tr
-          td= position.drink.name
+          td= link_to position.drink.name, edit_settlement_position_path(position.settlement, position)
           td= position.amount
           td= formatted_price(position.price_in_cents)
-          td
-            = link_to "Edit", edit_settlement_position_path(position.settlement, position)
-            = button_to "Delete", settlement_position_path(position.settlement, position), method: :delete, data: { turbo_confirm: "Sure?" }
+          td= button_to "Delete", settlement_position_path(position.settlement, position), method: :delete, data: { turbo_confirm: "Sure?" }
       tr
         td
         td

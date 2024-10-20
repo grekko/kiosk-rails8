@@ -1,0 +1,23 @@
+h1 Inventory
+
+table#inventory
+  thead
+    th Drink
+    th Ordered
+    th Settled
+    th Status
+    th Total Price
+  tbody
+    - @drinks.each do |drink|
+      ruby:
+        ordered = @ordered_drink_count.fetch(drink.id, 0)
+        settled = @settled_drink_count.fetch(drink.id, 0)
+        status = ordered - settled
+        total_price = drink.price_in_cents * status
+
+      tr
+        td= drink.name
+        td= ordered
+        td= settled
+        td= status
+        td= formatted_price(total_price)

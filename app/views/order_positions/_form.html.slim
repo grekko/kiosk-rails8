@@ -1,9 +1,10 @@
 ruby:
+  url = position ? order_position_path(@order, position) : order_positions_path(@order, position)
   position ||= :order_position
 
-= simple_form_for position, url: order_positions_path(@order), method: :post do |form|
+= simple_form_for position, url: do |form|
   = form.input :drink_id, collection: Drink.all, include_blank: false
-  = form.input :amount, collection: 1..30
+  = form.input :amount, collection: 1..30, include_blank: false
   = form.input :price_in_cents
   = form.input :deposit_in_cents
 

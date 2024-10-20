@@ -2,11 +2,11 @@ class SettlementsController < ApplicationController
   before_action :set_settlement, only: %i[ edit update destroy ]
 
   def index
-    @settlements = Settlement.all
+    @settlements = Settlement.order(generated_at: :desc).all
   end
 
   def new
-    @settlement = Settlement.new
+    @settlement = Settlement.new(generated_at: Time.current)
   end
 
   def edit

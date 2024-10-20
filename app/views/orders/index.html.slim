@@ -12,11 +12,13 @@ table#orders
   tbody
     - @orders.each do |order|
       tr
-        td= l(order.ordered_at)
+        td
+          = link_to l(order.ordered_at), edit_order_path(order)
         td= formatted_price(order.price_in_cents)
         td= formatted_price(order.deposit_in_cents)
         td= formatted_price(order.total_price_in_cents)
-        td= link_to "Edit", edit_order_path(order)
+        td
+          = button_to "Delete", order_path(order), method: :delete, data: { turbo_confirm: "Sure?" }
 
     tr
       td

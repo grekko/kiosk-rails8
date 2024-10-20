@@ -16,13 +16,13 @@
     tbody
       - order.positions.each do |position|
         tr
-          td= position.drink.name
+          td
+            = link_to position.drink.name, edit_order_position_path(position.order, position)
           td= position.amount
           td= formatted_price(position.price_in_cents)
           td= formatted_price(position.deposit_in_cents)
           td= formatted_price(position.total_price_in_cents)
           td
-            = link_to "Edit", edit_order_position_path(position.order, position)
             = button_to "Delete", order_position_path(position.order, position), method: :delete, data: { turbo_confirm: "Sure?" }
       tr
         td
