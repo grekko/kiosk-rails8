@@ -1,8 +1,8 @@
 h1 Inventory
 
-table#inventory
+table#drinks
   thead
-    th Drink
+    th Name
     th Ordered
     th Settled
     th Status
@@ -21,3 +21,20 @@ table#inventory
         td= settled
         td= status
         td= formatted_price(total_price)
+
+h2 Finance
+
+table#finance
+  thead
+    th Name
+    th Value
+  tbody
+    tr
+      td Settled
+      td= formatted_price(@settled_in_cents)
+    tr
+      td Ordered
+      td= formatted_price(@ordered_in_cents)
+    tr
+      td Status
+      td= formatted_price(@settled_in_cents - @ordered_in_cents)
