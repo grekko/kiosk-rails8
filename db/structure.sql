@@ -26,7 +26,14 @@ FOREIGN KEY ("drink_id")
 CREATE INDEX "index_settlement_positions_on_settlement_id" ON "settlement_positions" ("settlement_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlement_positions_on_drink_id" ON "settlement_positions" ("drink_id") /*application='Kiosk'*/;
 CREATE TABLE IF NOT EXISTS "drinks" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
+CREATE TABLE IF NOT EXISTS "settlement_prices" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "drink_id" integer NOT NULL, "valid_from" date NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "deactivated_at" datetime(6) /*application='Kiosk'*/, CONSTRAINT "fk_rails_c777451a4b"
+FOREIGN KEY ("drink_id")
+  REFERENCES "drinks" ("id")
+);
+CREATE INDEX "index_settlement_prices_on_drink_id" ON "settlement_prices" ("drink_id") /*application='Kiosk'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20241020213220'),
+('20241020210147'),
 ('20241020183615'),
 ('20241020181935'),
 ('20241020174122'),

@@ -12,6 +12,6 @@ class SettlementPosition < ApplicationRecord
   def set_price_in_cents
     return if drink.blank? || amount.blank?
 
-    self.price_in_cents = amount * drink.price_in_cents
+    self.price_in_cents = amount * drink.price_in_cents_at(date: settlement.generated_at)
   end
 end

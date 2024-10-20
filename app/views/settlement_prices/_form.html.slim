@@ -1,0 +1,5 @@
+= simple_form_for price do |form|
+  = form.input :drink_id, collection: (Drink.all - SettlementPrice.active.map(&:drink)), include_blank: false
+  = form.input :price_in_cents
+  = form.input :valid_from, html5: true
+  = form.button :submit

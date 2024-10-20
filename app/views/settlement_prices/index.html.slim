@@ -1,0 +1,17 @@
+h1 Prices
+
+= link_to "New Price", new_settlement_price_path
+
+table#settlements
+  thead
+    th Drink
+    th Price
+    th Valid from
+    th Actions
+  tbody
+    - @prices.each do |price|
+      tr
+        td= price.drink.name
+        td= link_to formatted_price(price.price_in_cents), edit_settlement_price_path(price)
+        td= l(price.valid_from, format: :short)
+        td= button_to "Deactivate", deactivate_settlement_price_path(price), method: :patch, data: { turbo_confirm: "Sure?" }
