@@ -1,17 +1,21 @@
 class OrderPositionsController < ApplicationController
   before_action :set_order
-  before_action :set_order_position, only: %i[ edit update ]
+  before_action :set_position, only: %i[ edit update ]
 
   def create
-    @order_position = OrderPosition.create(create_order_params)
-    redirect_to edit_order_path(@order)
+    @position = OrderPosition.new(create_position_params)
+    if @position.save
+      redirect_to edit_order_path(@order)
+    else
+      render "orders/edit", status: :unprocessable_entity
+    end
   end
 
   def edit
   end
 
   def update
-    if @order_position.update(order_position_params)
+    if @position.update(position_params)
       redirect_to edit_order_path(@order)
     else
       render :edit, status: :unprocessable_entity
@@ -19,8 +23,8 @@ class OrderPositionsController < ApplicationController
   end
 
   def destroy
-    order_position = @order.positions.find(params[:id])
-    order_position.destroy!
+    position = @order.positions.find(params[:id])
+    position.destroy!
     redirect_to edit_order_path(@order)
   end
 
@@ -30,15 +34,15 @@ class OrderPositionsController < ApplicationController
     @order = Order.find(params[:order_id])
   end
 
-  def set_order_position
-    @order = OrderPosition.find(params[:id])
+  def set_position
+    @position = @order.positions.find(params[:id])
   end
 
-  def create_order_params
-    order_position_params.merge(order: @order)
+  def create_position_params
+    position_params.merge(order: @order)
   end
 
-  def order_position_params
+  def position_params
     params.expect(order_position: [ :drink_id, :amount, :price_in_cents, :deposit_in_cents ])
   end
 end

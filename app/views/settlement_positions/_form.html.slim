@@ -1,0 +1,8 @@
+ruby:
+  position ||= :settlement_position
+
+= simple_form_for position, url: settlement_positions_path(@settlement), method: :post do |form|
+  = form.input :drink_id, collection: Drink.all, include_blank: false
+  = form.input :amount, collection: 1..30
+
+  = form.button :submit

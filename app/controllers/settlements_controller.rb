@@ -41,8 +41,7 @@ class SettlementsController < ApplicationController
     @settlement = Settlement.find(params.expect(:id))
   end
 
-  # Only allow a list of trusted parameters through.
   def settlement_params
-    params.expect(settlement: [ :client_id, :paid_at ])
+    params.expect(settlement: [ :client_id, :generated_at, :paid_at ])
   end
 end

@@ -11,5 +11,5 @@ table#settlements
     - @settlements.each do |settlement|
       tr
         td= settlement.client.name
-        td= formatted_price(0)
+        td= formatted_price(settlement.price_in_cents)
         td= link_to "Edit", edit_settlement_path(settlement)
