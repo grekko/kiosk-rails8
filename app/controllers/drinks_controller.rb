@@ -1,5 +1,5 @@
 class DrinksController < ApplicationController
-  before_action :set_drink, only: %i[ edit update destroy ]
+  before_action :set_drink, only: %i[ edit update ]
 
   def index
     @drinks = Drink.all
@@ -28,11 +28,6 @@ class DrinksController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
-  end
-
-  def destroy
-    @drink.destroy!
-    redirect_to drinks_path
   end
 
   private

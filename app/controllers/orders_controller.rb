@@ -1,8 +1,8 @@
 class OrdersController < ApplicationController
-  before_action :set_order, only: %i[ edit update destroy ]
+  before_action :set_order, only: %i[ edit update ]
 
   def index
-    @orders = Order.all
+    @orders = Order.order(ordered_at: :desc)
   end
 
   def new
@@ -28,11 +28,6 @@ class OrdersController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
-  end
-
-  def destroy
-    @order.destroy!
-    redirect_to orders_path
   end
 
   private

@@ -22,12 +22,6 @@ class OrderPositionsController < ApplicationController
     end
   end
 
-  def destroy
-    position = @order.positions.find(params[:id])
-    position.destroy!
-    redirect_to edit_order_path(@order)
-  end
-
   private
 
   def set_order

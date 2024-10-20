@@ -1,13 +1,13 @@
 Rails.application.routes.draw do
-  resources :drinks, except: %i[show]
-  resources :clients, except: %i[show]
+  resources :drinks, except: %i[show destroy]
+  resources :clients, except: %i[show destroy]
 
-  resources :orders, except: %i[show] do
-    resources :positions, controller: "order_positions", except: %i[index show]
+  resources :orders, except: %i[show destroy] do
+    resources :positions, controller: "order_positions", except: %i[index show destroy]
   end
 
-  resources :settlements, except: %i[show] do
-    resources :positions, controller: "settlement_positions", except: %i[index show]
+  resources :settlements, except: %i[show destroy] do
+    resources :positions, controller: "settlement_positions", except: %i[index show destroy]
   end
 
   resources :settlement_prices, except: %i[show destroy] do

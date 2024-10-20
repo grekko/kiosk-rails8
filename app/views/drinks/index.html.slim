@@ -7,11 +7,9 @@ table#drinks
     th Name
     th Current Price
     th Default Price
-    th Actions
   tbody
     - @drinks.each do |drink|
       tr
         td= link_to drink.name, edit_drink_path(drink)
         td= formatted_price(drink.current_price_in_cents)
         td= formatted_price(drink.price_in_cents)
-        td= button_to "Delete", drink_path(drink), method: :delete, data: { turbo_confirm: "Sure?" }

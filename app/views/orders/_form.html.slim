@@ -12,7 +12,6 @@
       th Price
       th Deposit
       th Total
-      th Actions
     tbody
       - order.positions.each do |position|
         tr
@@ -22,8 +21,7 @@
           td= formatted_price(position.price_in_cents)
           td= formatted_price(position.deposit_in_cents)
           td= formatted_price(position.total_price_in_cents)
-          td
-            = button_to "Delete", order_position_path(position.order, position), method: :delete, data: { turbo_confirm: "Sure?" }
+
       tr
         td
         td
