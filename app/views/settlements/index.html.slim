@@ -1,0 +1,15 @@
+h1 Settlements
+
+= link_to "New settlement", new_settlement_path
+
+table#settlements
+  thead
+    th Client
+    th Price
+    th Actions
+  tbody
+    - @settlements.each do |settlement|
+      tr
+        td= settlement.client.name
+        td= formatted_price(0)
+        td= link_to "Edit", edit_settlement_path(settlement)

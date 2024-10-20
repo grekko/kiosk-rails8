@@ -1,0 +1,13 @@
+= simple_form_for settlement do |form|
+  = form.input :client_id, collection: Client.all
+  = form.button :submit
+
+h2 Add Position
+
+/= simple_form_for :order_position, url: order_positions_path(order), method: :post do |form|
+/  = form.input :drink_id, collection: Drink.all
+/  = form.input :amount, collection: 1..30
+/  = form.input :price_in_cents
+/  = form.input :deposit_in_cents
+/
+/  = form.button :submit, "Create"

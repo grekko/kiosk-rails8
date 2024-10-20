@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_10_20_174122) do
+ActiveRecord::Schema[8.0].define(version: 2024_10_20_181935) do
   create_table "clients", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -34,6 +34,15 @@ ActiveRecord::Schema[8.0].define(version: 2024_10_20_174122) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "settlements", force: :cascade do |t|
+    t.integer "client_id", null: false
+    t.datetime "paid_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_settlements_on_client_id"
+  end
+
   add_foreign_key "order_positions", "drinks"
   add_foreign_key "order_positions", "orders"
+  add_foreign_key "settlements", "clients"
 end
