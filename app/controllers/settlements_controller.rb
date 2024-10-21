@@ -1,5 +1,5 @@
 class SettlementsController < ApplicationController
-  before_action :set_settlement, only: %i[ edit update destroy ]
+  before_action :set_settlement, only: %i[ edit update complete mark_paid ]
 
   def index
     @settlements = Settlement.order(generated_at: :desc).all
@@ -30,8 +30,13 @@ class SettlementsController < ApplicationController
     end
   end
 
-  def destroy
-    @settlement.destroy!
+  def complete
+    @settlement.complete!
+    redirect_to settlements_path
+  end
+
+  def mark_paid
+    @settlement.mark_paid!
     redirect_to settlements_path
   end
 

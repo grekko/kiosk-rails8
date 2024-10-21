@@ -13,7 +13,9 @@ gem "stimulus-rails" # Hotwire's modest JavaScript framework [https://stimulus.h
 gem "turbo-rails" # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
 gem "slim-rails"
 
+## Utils
 gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "aasm"
 
 ## Background Jobs, Cache
 gem "solid_cache"

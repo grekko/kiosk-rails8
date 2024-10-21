@@ -7,7 +7,12 @@ Rails.application.routes.draw do
   end
 
   resources :settlements, except: %i[show destroy] do
-    resources :positions, controller: "settlement_positions", except: %i[index show destroy]
+    member do
+      patch :complete
+      patch :mark_paid
+    end
+
+    resources :positions, controller: "settlement_positions", except: %i[index show]
   end
 
   resources :settlement_prices, except: %i[show destroy] do
