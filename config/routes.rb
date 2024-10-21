@@ -6,7 +6,7 @@ Rails.application.routes.draw do
     resources :positions, controller: "order_positions", except: %i[index show destroy]
   end
 
-  resources :settlements, except: %i[show destroy] do
+  resources :settlements, except: %i[show] do
     member do
       patch :complete
       patch :mark_paid

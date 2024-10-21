@@ -27,7 +27,7 @@
         td
         td: strong= formatted_price(settlement.price_in_cents)
 
-- if settlement&.draft?
+- if settlement.persisted? && settlement.draft?
   h2 Add Position
 
   = render "settlement_positions/form", position: @position
