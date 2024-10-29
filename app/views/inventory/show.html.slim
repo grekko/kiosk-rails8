@@ -1,3 +1,7 @@
+ruby:
+  total_purchase_price = 0
+  total_selling_price = 0
+
 h1 Inventory
 
 table#drinks
@@ -6,21 +10,32 @@ table#drinks
     th Ordered
     th Settled
     th Status
-    th Total Price
+    th Purchase Price
+    th Selling Price
   tbody
     - @drinks.each do |drink|
       ruby:
         ordered = @ordered_drink_count.fetch(drink.id, 0)
         settled = @settled_drink_count.fetch(drink.id, 0)
         status = ordered - settled
-        total_price = drink.price_in_cents * status
+        purchase_price = drink.price_in_cents * status
+        total_purchase_price += purchase_price
+
+        selling_price = drink.current_price_in_cents * status
+        total_selling_price += selling_price
 
       tr
-        td= drink.name
+        td= link_to drink.name, edit_drink_path(drink)
         td= ordered
         td= settled
         td= status
-        td= formatted_price(total_price)
+        td= formatted_price(purchase_price)
+        td= formatted_price(selling_price)
+
+    tr
+      td colspan=4
+      td: strong= formatted_price(total_purchase_price)
+      td: strong= formatted_price(total_selling_price)
 
 h2 Finance
 
@@ -30,11 +45,14 @@ table#finance
     th Value
   tbody
     tr
-      td Settled
+      td: strong Open
+      td: strong= formatted_price(@unsettled_in_cents)
+    tr
+      td: strong Settled
       td= formatted_price(@settled_in_cents)
     tr
-      td Ordered
+      td: strong Ordered
       td= formatted_price(@ordered_in_cents)
     tr
-      td Status
+      td: strong Status
       td= formatted_price(@settled_in_cents - @ordered_in_cents)
