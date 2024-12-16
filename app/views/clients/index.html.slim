@@ -1,3 +1,9 @@
+ruby:
+  settlements_total = {
+    completed: 0,
+    paid: 0
+  }
+
 h1 Clients
 
 = link_to "New client", new_client_path
@@ -10,8 +16,21 @@ table#clients
     th Actions
   tbody
     - @clients.each do |client|
+      ruby:
+        completed = client.settlements.completed.sum(&:price_in_cents)
+        paid = client.settlements.paid.sum(&:price_in_cents)
+        settlements_total[:completed] += completed
+        settlements_total[:paid] += paid
       tr
         td= client.name
-        td: strong= formatted_price(client.settlements.completed.sum(&:price_in_cents))
-        td= formatted_price(client.settlements.paid.sum(&:price_in_cents))
+        td: strong= formatted_price(completed)
+        td= formatted_price(paid)
         td= link_to "Edit", edit_client_path(client)
+
+  tfoot
+    tr
+      th Totals
+      td
+        strong = formatted_price(settlements_total[:completed])
+      td = formatted_price(settlements_total[:paid])
+      th
