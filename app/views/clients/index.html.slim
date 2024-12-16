@@ -25,7 +25,10 @@ table#clients
         td= client.name
         td: strong= formatted_price(completed)
         td= formatted_price(paid)
-        td= link_to "Edit", edit_client_path(client)
+        td
+          = link_to "Edit", edit_client_path(client)
+          | &nbsp;
+          = link_to "Settlements", filtered_settlements_path(client_id: client.id)
 
   tfoot
     tr
