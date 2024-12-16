@@ -5,9 +5,13 @@ h1 Clients
 table#clients
   thead
     th Name
+    th Open
+    th Paid
     th Actions
   tbody
     - @clients.each do |client|
       tr
         td= client.name
+        td: strong= formatted_price(client.settlements.completed.sum(&:price_in_cents))
+        td= formatted_price(client.settlements.paid.sum(&:price_in_cents))
         td= link_to "Edit", edit_client_path(client)
