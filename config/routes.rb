@@ -7,6 +7,10 @@ Rails.application.routes.draw do
   end
 
   resources :settlements, except: %i[show] do
+    collection do
+      get "filtered/:client_id", to: "settlements#filtered", as: :filtered
+    end
+
     member do
       patch :complete
       patch :mark_paid

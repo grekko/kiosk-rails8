@@ -5,6 +5,11 @@ class SettlementsController < ApplicationController
     @settlements = Settlement.order(generated_at: :desc).all
   end
 
+  def filtered
+    @client = Client.find(params[:client_id])
+    @settlements = Settlement.where(client: @client).order(generated_at: :desc).all
+  end
+
   def new
     @settlement = Settlement.new(generated_at: Time.current)
   end

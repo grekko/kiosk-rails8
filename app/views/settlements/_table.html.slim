@@ -1,0 +1,30 @@
+table#settlements
+  thead
+    th Client
+    th Price
+    th State
+    th Generated At
+    th Completed At
+    th Paid At
+    th Actions
+  tbody
+    - settlements.group_by { |record| record.generated_at }.each do |date, settlements|
+      tr
+        td colspan="7" style="background-color: green; color: white;"
+          = l(date)
+      - settlements.each do |settlement|
+        tr
+          td= link_to settlement.client.name, filtered_settlements_path(client_id: settlement.client_id)
+          td= link_to formatted_price(settlement.price_in_cents), edit_settlement_path(settlement)
+          td= settlement.aasm_state
+          td= formatted_date(settlement.generated_at)
+          td= formatted_date(settlement.completed_at)
+          td= formatted_date(settlement.paid_at)
+          td
+            - if settlement.draft?
+              = link_to "Edit", edit_settlement_path(settlement)
+              = button_to "Delete", settlement_path(settlement), method: :delete, data: { turbo_confirm: "Sure?" }
+              = button_to "Complete", complete_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }
+            - if settlement.completed?
+              = button_to "Mark Paid", mark_paid_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }
+
