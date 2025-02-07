@@ -11,7 +11,13 @@ class SettlementsController < ApplicationController
   end
 
   def new
-    @settlement = Settlement.new(generated_at: Time.current)
+    @settlement = Settlement.new(
+      {
+        generated_at: Time.current,
+        monthly_report_id: params[:monthly_report_id],
+        client_id: params[:client_id]
+      }.compact_blank
+    )
   end
 
   def edit
@@ -60,6 +66,6 @@ class SettlementsController < ApplicationController
   end
 
   def settlement_params
-    params.expect(settlement: [ :client_id, :generated_at, :paid_at ])
+    params.expect(settlement: [ :client_id, :generated_at, :paid_at, :monthly_report_id ])
   end
 end

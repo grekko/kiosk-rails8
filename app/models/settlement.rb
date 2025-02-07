@@ -2,6 +2,7 @@ class Settlement < ApplicationRecord
   include AASM
 
   belongs_to :client
+  belongs_to :monthly_report
   has_many :positions, class_name: "SettlementPosition", dependent: :destroy
 
   validates :generated_at, presence: true

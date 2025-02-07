@@ -1,0 +1,11 @@
+h1 Monthly Reports
+
+= link_to "New Report", new_monthly_report_path
+
+table#monthly_reports
+  thead
+    th Title
+  tbody
+    - @monthly_reports.each do |report|
+      tr
+        td= link_to report.title, edit_monthly_report_path(report)

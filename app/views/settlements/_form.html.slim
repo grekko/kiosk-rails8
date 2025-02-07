@@ -1,6 +1,7 @@
 = simple_form_for settlement do |form|
   fieldset disabled=!settlement.draft?
     = form.input :client_id, collection: Client.all, include_blank: false
+    = form.input :monthly_report_id, collection: MonthlyReport.all, include_blank: false
     = form.input :generated_at, html5: true
     = form.button :submit
 
@@ -28,6 +29,14 @@
         td: strong= formatted_price(settlement.price_in_cents)
 
 - if settlement.persisted? && settlement.draft?
-  h2 Add Position
+  .settlement-form
+    .settlement-form__new-position
+      h2 Add Position
 
-  = render "settlement_positions/form", position: @position
+      = render "settlement_positions/form", position: @position
+
+    - if settlement.monthly_report.present?
+      .settlement-form__monthly-report-image
+        = link_to "To Report", edit_monthly_report_path(settlement.monthly_report)
+
+        = image_tag settlement.monthly_report.image.url

@@ -26,12 +26,34 @@ FOREIGN KEY ("drink_id")
   REFERENCES "drinks" ("id")
 );
 CREATE INDEX "index_settlement_prices_on_drink_id" ON "settlement_prices" ("drink_id") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL /*application='Kiosk'*/, "completed_at" datetime(6) /*application='Kiosk'*/, CONSTRAINT "fk_rails_4a7bf0e43f"
+CREATE TABLE IF NOT EXISTS "monthly_reports" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "title" text, "description" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
+CREATE TABLE IF NOT EXISTS "active_storage_blobs" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar NOT NULL, "filename" varchar NOT NULL, "content_type" varchar, "metadata" text, "service_name" varchar NOT NULL, "byte_size" bigint NOT NULL, "checksum" varchar, "created_at" datetime(6) NOT NULL);
+CREATE UNIQUE INDEX "index_active_storage_blobs_on_key" ON "active_storage_blobs" ("key") /*application='Kiosk'*/;
+CREATE TABLE IF NOT EXISTS "active_storage_attachments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "record_type" varchar NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_c3b3935057"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+);
+CREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id") /*application='Kiosk'*/;
+CREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id") /*application='Kiosk'*/;
+CREATE TABLE IF NOT EXISTS "active_storage_variant_records" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "blob_id" bigint NOT NULL, "variation_digest" varchar NOT NULL, CONSTRAINT "fk_rails_993965df05"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+);
+CREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest") /*application='Kiosk'*/;
+CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, CONSTRAINT "fk_rails_5c7519b292"
+FOREIGN KEY ("monthly_report_id")
+  REFERENCES "monthly_reports" ("id")
+, CONSTRAINT "fk_rails_4a7bf0e43f"
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 );
 CREATE INDEX "index_settlements_on_client_id" ON "settlements" ("client_id") /*application='Kiosk'*/;
+CREATE INDEX "index_settlements_on_monthly_report_id" ON "settlements" ("monthly_report_id") /*application='Kiosk'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20250207170802'),
+('20250207093528'),
+('20250207090317'),
+('20250207090131'),
 ('20241021080852'),
 ('20241020213220'),
 ('20241020210147'),

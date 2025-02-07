@@ -16,6 +16,7 @@ gem "slim-rails"
 ## Utils
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "aasm"
+gem "image_processing", ">= 1.2"
 
 ## Background Jobs, Cache
 gem "solid_cache"

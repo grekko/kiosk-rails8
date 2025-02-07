@@ -8,3 +8,23 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.monthly-report-form {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.report-clients {
+  margin-top: 300px;
+}
+
+.settlement-form {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.settlement-form__monthly-report-image {
+  flex: 1 0 50%;
+}

@@ -6,6 +6,12 @@ Rails.application.routes.draw do
     resources :positions, controller: "order_positions", except: %i[index show destroy]
   end
 
+  resources :monthly_reports, except: %i[destroy] do
+    member do
+      patch :complete_settlements
+    end
+  end
+
   resources :settlements, except: %i[show] do
     collection do
       get "filtered/:client_id", to: "settlements#filtered", as: :filtered
