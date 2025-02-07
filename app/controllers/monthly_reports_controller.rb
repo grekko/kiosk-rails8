@@ -2,7 +2,7 @@ class MonthlyReportsController < ApplicationController
   before_action :set_monthly_report, only: %i[ edit update complete_settlements ]
 
   def index
-    @monthly_reports = MonthlyReport.all
+    @monthly_reports = MonthlyReport.order(id: :desc).all
   end
 
   def new

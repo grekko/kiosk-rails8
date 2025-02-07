@@ -2,7 +2,7 @@ class SettlementsController < ApplicationController
   before_action :set_settlement, only: %i[ edit update destroy complete mark_paid ]
 
   def index
-    @settlements = Settlement.order(generated_at: :desc).all
+    @settlements = Settlement.includes(:client, :monthly_report).order(generated_at: :desc).all
   end
 
   def filtered

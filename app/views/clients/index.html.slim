@@ -1,39 +1,45 @@
 ruby:
-  settlements_total = {
-    completed: 0,
-    paid: 0
-  }
+  settlements_total = Hash.new(0)
 
 h1 Clients
 
-= link_to "New client", new_client_path
+= link_to "New Client", new_client_path
 
 table#clients
   thead
     th Name
     th Open
+    th Payment waiting
     th Paid
     th Actions
   tbody
     - @clients.each do |client|
       ruby:
         completed = client.settlements.completed.sum(&:price_in_cents)
+        payment_waiting = client.payments.draft.sum(&:amount_in_cents)
+        due = completed - payment_waiting
         paid = client.settlements.paid.sum(&:price_in_cents)
         settlements_total[:completed] += completed
+        settlements_total[:payment_waiting] += payment_waiting
         settlements_total[:paid] += paid
       tr
         td= client.name
         td: strong= formatted_price(completed)
+        td= formatted_price(payment_waiting)
         td= formatted_price(paid)
         td
           = link_to "Edit", edit_client_path(client)
           | &nbsp;
           = link_to "Settlements", filtered_settlements_path(client_id: client.id)
+          - if due.positive?
+            | &nbsp;
+            = link_to "Create Payment", new_client_payment_path(client_id: client.id)
 
   tfoot
     tr
       th Totals
       td
         strong = formatted_price(settlements_total[:completed])
+      td = formatted_price(settlements_total[:payment_waiting])
       td = formatted_price(settlements_total[:paid])
       th

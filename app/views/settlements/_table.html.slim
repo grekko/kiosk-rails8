@@ -6,11 +6,12 @@ table#settlements
     th Generated At
     th Completed At
     th Paid At
+    th Monthly Report
     th Actions
   tbody
     - settlements.group_by { |record| record.generated_at }.each do |date, settlements|
       tr
-        td colspan="7" style="background-color: green; color: white;"
+        td colspan="8" style="background-color: green; color: white;"
           = l(date)
       - settlements.each do |settlement|
         tr
@@ -20,6 +21,7 @@ table#settlements
           td= formatted_date(settlement.generated_at)
           td= formatted_date(settlement.completed_at)
           td= formatted_date(settlement.paid_at)
+          td= link_to settlement.monthly_report.title, settlement.monthly_report
           td
             - if settlement.draft?
               = link_to "Edit", edit_settlement_path(settlement)

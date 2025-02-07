@@ -1,0 +1,18 @@
+table#payments
+  thead
+    th Client
+    th Amount
+    th State
+    th Settled At
+    th Actions
+  tbody
+    - payments.each do |payment|
+      tr
+        td= payment.client.name
+        td= link_to formatted_price(payment.amount_in_cents), edit_payment_path(payment)
+        td= payment.aasm_state
+        td= formatted_date(payment.settled_at)
+        td
+          - if payment.draft?
+            = button_to "Mark Settled", mark_settled_payment_path(payment), method: :patch, data: { turbo_confirm: "Sure?" }
+

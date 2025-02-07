@@ -40,16 +40,26 @@ FOREIGN KEY ("blob_id")
   REFERENCES "active_storage_blobs" ("id")
 );
 CREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, CONSTRAINT "fk_rails_5c7519b292"
-FOREIGN KEY ("monthly_report_id")
-  REFERENCES "monthly_reports" ("id")
-, CONSTRAINT "fk_rails_4a7bf0e43f"
+CREATE TABLE IF NOT EXISTS "payments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "amount_in_cents" integer DEFAULT 0 NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "settled_at" datetime(6), "note" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_66d0485df7"
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 );
+CREATE INDEX "index_payments_on_client_id" ON "payments" ("client_id") /*application='Kiosk'*/;
+CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, CONSTRAINT "fk_rails_4a7bf0e43f"
+FOREIGN KEY ("client_id")
+  REFERENCES "clients" ("id")
+, CONSTRAINT "fk_rails_5c7519b292"
+FOREIGN KEY ("monthly_report_id")
+  REFERENCES "monthly_reports" ("id")
+, CONSTRAINT "fk_rails_6ad2b9e368"
+FOREIGN KEY ("payment_id")
+  REFERENCES "payments" ("id")
+);
 CREATE INDEX "index_settlements_on_client_id" ON "settlements" ("client_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlements_on_monthly_report_id" ON "settlements" ("monthly_report_id") /*application='Kiosk'*/;
+CREATE INDEX "index_settlements_on_payment_id" ON "settlements" ("payment_id") /*application='Kiosk'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20250207171219'),
 ('20250207170802'),
 ('20250207093528'),
 ('20250207090317'),

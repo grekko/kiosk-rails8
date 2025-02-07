@@ -1,0 +1,18 @@
+ruby:
+  if payment.persisted?
+    url = payment_path(payment)
+    method = :patch
+  else
+    url = client_payments_path(payment.client, return_to_path: clients_path)
+    method = :post
+  end
+
+- if payment.persisted?
+  = text_area_tag :message, payment_message(payment), size: "20x10"
+
+= simple_form_for :payment, url: url, method: method do |form|
+  fieldset disabled=!payment.draft?
+    = form.input :amount_in_cents, disabled: true
+    = form.input :note, as: :text
+    = form.button :submit
+
