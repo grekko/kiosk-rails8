@@ -29,14 +29,18 @@
         td: strong= formatted_price(settlement.price_in_cents)
 
 - if settlement.persisted? && settlement.draft?
-  .settlement-form
-    .settlement-form__new-position
-      h2 Add Position
+  = button_to "Complete Settlement", complete_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }
 
-      = render "settlement_positions/form", position: @position
+- if settlement.persisted?
+  .settlement-form
+    - if settlement.draft?
+      .settlement-form__new-position
+        h2 Add Position
+
+        = render "settlement_positions/form", settlement: @settlement, position: @position
 
     - if settlement.monthly_report.present?
       .settlement-form__monthly-report-image
-        = link_to "To Report", edit_monthly_report_path(settlement.monthly_report)
+        = link_to "Back to the Report", edit_monthly_report_path(settlement.monthly_report)
 
         = image_tag settlement.monthly_report.image.url

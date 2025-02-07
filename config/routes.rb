@@ -28,7 +28,6 @@ Rails.application.routes.draw do
 
     member do
       patch :complete
-      patch :mark_paid
     end
 
     resources :positions, controller: "settlement_positions", except: %i[index show]

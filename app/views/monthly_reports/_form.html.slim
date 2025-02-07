@@ -2,12 +2,9 @@
   = simple_form_for monthly_report do |form|
     = form.input :title, as: :string
     = form.input :description, as: :text
-
     - if form.object.image.attached?
       = image_tag form.object.image.url
-
     = form.input :image
-
     = form.button :submit
 
   - if monthly_report.persisted?
@@ -19,7 +16,7 @@
 
       h3 Settled
       ul
-        - @settled_clients.each do |client|
-          li= link_to client.name, edit_client_path(client)
+        - @settlements.each do |settlement|
+          li= link_to settlement.client.name, edit_settlement_path(settlement)
 
       = button_to "Mark as completed", complete_settlements_monthly_report_path(monthly_report), method: :patch, data: { turbo_confirm: "Sure?" }

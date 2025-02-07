@@ -1,9 +1,10 @@
 ruby:
-  url = position ? settlement_position_path(@settlement, position) : settlement_positions_path(@settlement, position)
+  url = position ? settlement_position_path(settlement, position) : settlement_positions_path(settlement, position)
   position ||= :settlement_position
 
 = simple_form_for position, url: do |form|
-  = form.input :drink_id, collection: Drink.all, include_blank: false
-  = form.input :amount, collection: 1..30, include_blank: false
+  fieldset disabled=!settlement.draft?
+    = form.input :drink_id, collection: Drink.all, include_blank: false
+    = form.input :amount, collection: 1..30, include_blank: false
 
-  = form.button :submit
+    = form.button :submit

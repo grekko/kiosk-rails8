@@ -10,8 +10,9 @@ class MonthlyReportsController < ApplicationController
   end
 
   def edit
-    @settled_clients = @monthly_report.settlements.includes(:client).map(&:client)
-    @clients = Client.all - @settled_clients
+    @settlements = @monthly_report.settlements.includes(:client)
+    settled_clients = @settlements.map(&:client)
+    @clients = Client.all - settled_clients
   end
 
   def create
@@ -33,9 +34,7 @@ class MonthlyReportsController < ApplicationController
   end
 
   def complete_settlements
-    @monthly_report.settlements.find_each do |settlement|
-      settlement.complete! unless settlement.completed?
-    end
+    @monthly_report.complete_settlements!
 
     redirect_back fallback_location: edit_monthly_report_path(@monthly_report)
   end

@@ -24,9 +24,4 @@ table#settlements
           td= link_to settlement.monthly_report.title, settlement.monthly_report
           td
             - if settlement.draft?
-              = link_to "Edit", edit_settlement_path(settlement)
               = button_to "Delete", settlement_path(settlement), method: :delete, data: { turbo_confirm: "Sure?" }
-              = button_to "Complete", complete_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }
-            - if settlement.completed?
-              = button_to "Mark Paid", mark_paid_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }
-
