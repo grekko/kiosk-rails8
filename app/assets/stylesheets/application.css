@@ -9,6 +9,12 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
+.order-form__positions {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
 .monthly-report-form {
   display: flex;
   align-items: flex-start;
