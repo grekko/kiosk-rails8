@@ -4,7 +4,7 @@ ruby:
 
 = simple_form_for position, url: do |form|
   fieldset disabled=!settlement.draft?
-    = form.input :drink_id, collection: Drink.all, include_blank: false
+    = form.input :drink_id, collection: DrinkInventory.all_rows.map { |row| ["#{row.remaining_count}x #{row.name}", row.id] }, include_blank: false
     = form.input :amount, collection: 1..30, include_blank: false
 
     = form.button :submit

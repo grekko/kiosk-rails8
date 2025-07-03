@@ -13,24 +13,18 @@ table#drinks
     th Purchase Price
     th Selling Price
   tbody
-    - @drinks.each do |drink|
+    - @drink_inventory_rows.each do |row|
       ruby:
-        ordered = @ordered_drink_count.fetch(drink.id, 0)
-        settled = @settled_drink_count.fetch(drink.id, 0)
-        status = ordered - settled
-        purchase_price = drink.price_in_cents * status
-        total_purchase_price += purchase_price
-
-        selling_price = drink.current_price_in_cents * status
-        total_selling_price += selling_price
+        total_purchase_price += row.purchase_price
+        total_selling_price += row.selling_price
 
       tr
-        td= link_to drink.name, edit_drink_path(drink)
-        td= ordered
-        td= settled
-        td= status
-        td= formatted_price(purchase_price)
-        td= formatted_price(selling_price)
+        td= link_to row.name, edit_drink_path(row.id)
+        td= row.ordered_count
+        td= row.settled_count
+        td= row.remaining_count
+        td= formatted_price(row.purchase_price)
+        td= formatted_price(row.selling_price)
 
     tr
       td colspan=4
