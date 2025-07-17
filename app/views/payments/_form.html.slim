@@ -7,12 +7,11 @@ ruby:
     method = :post
   end
 
-- if payment.persisted?
-  = text_area_tag :message, payment_message(payment), size: "20x10"
-
 = simple_form_for :payment, url: url, method: method do |form|
   fieldset disabled=!payment.draft?
     = form.input :amount_in_cents, disabled: true
     = form.input :note, as: :text
     = form.button :submit
 
+h2 Vorschau
+= text_area_tag :message, payment_message(payment), size: "20x10"
