@@ -42,6 +42,7 @@ group :development do
   gem "web-console"
   gem "ruby-lsp"
   gem "ruby-lsp-rails"
+  gem "tidewave" # AI coding agent by Dashbit
 end
 
 group :test do
