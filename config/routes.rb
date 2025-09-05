@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   resources :drinks, except: %i[show destroy]
 
   resources :clients, except: %i[destroy] do
+    member do
+      patch :suspend
+      patch :reinstate
+    end
     resources :payments, only: %i[new create]
   end
 

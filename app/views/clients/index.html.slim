@@ -22,8 +22,11 @@ table#clients
         settlements_total[:completed] += completed
         settlements_total[:payment_waiting] += payment_waiting
         settlements_total[:paid] += paid
-      tr
-        td= client.name
+      tr class="#{client.suspended? ? 'text-muted' : ''}"
+        td
+          = client.name
+          - if client.suspended?
+            |  (Suspended)
         td: strong= formatted_price(completed)
         td= formatted_price(payment_waiting)
         td= formatted_price(paid)
@@ -34,6 +37,11 @@ table#clients
           - if due.positive?
             | &nbsp;
             = link_to "Create Payment", new_client_payment_path(client_id: client.id)
+          | &nbsp;
+          - if client.suspended?
+            = button_to "Reinstate", reinstate_client_path(client), method: :patch, class: "btn btn-sm btn-success"
+          - else
+            = button_to "Suspend", suspend_client_path(client), method: :patch, class: "btn btn-sm btn-warning", data: { confirm: "Are you sure you want to suspend #{client.name}?" }
 
   tfoot
     tr

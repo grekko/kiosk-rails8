@@ -12,7 +12,7 @@ class MonthlyReportsController < ApplicationController
   def edit
     @settlements = @monthly_report.settlements.includes(:client)
     settled_clients = @settlements.map(&:client)
-    @clients = Client.all - settled_clients
+    @clients = Client.active - settled_clients
   end
 
   def create

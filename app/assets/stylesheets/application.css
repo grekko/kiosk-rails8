@@ -34,3 +34,8 @@
 .settlement-form__monthly-report-image {
   flex: 1 0 50%;
 }
+
+.text-muted {
+  opacity: 0.6;
+  font-style: italic;
+}
