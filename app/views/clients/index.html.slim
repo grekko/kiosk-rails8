@@ -11,7 +11,8 @@ table#clients
     th Open
     th Payment waiting
     th Paid
-    th Actions
+    th Create Payment
+    th Other
   tbody
     - @clients.each do |client|
       ruby:
@@ -31,17 +32,18 @@ table#clients
         td= formatted_price(payment_waiting)
         td= formatted_price(paid)
         td
+          - if due.positive?
+            | &nbsp;
+            = button_to "Create Payment", new_client_payment_path(client_id: client.id)
+        td
           = link_to "Edit", edit_client_path(client)
           | &nbsp;
           = link_to "Settlements", filtered_settlements_path(client_id: client.id)
-          - if due.positive?
-            | &nbsp;
-            = link_to "Create Payment", new_client_payment_path(client_id: client.id)
           | &nbsp;
           - if client.suspended?
-            = button_to "Reinstate", reinstate_client_path(client), method: :patch, class: "btn btn-sm btn-success"
+            = link_to "Reinstate", reinstate_client_path(client), method: :patch
           - else
-            = button_to "Suspend", suspend_client_path(client), method: :patch, class: "btn btn-sm btn-warning", data: { confirm: "Are you sure you want to suspend #{client.name}?" }
+            = link_to "Suspend", suspend_client_path(client), method: :patch, data: { turbo_confirm: "Are you sure you want to suspend #{client.name}?" }
 
   tfoot
     tr
