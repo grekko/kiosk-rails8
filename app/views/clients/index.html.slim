@@ -34,7 +34,7 @@ table#clients
         td
           - if due.positive?
             | &nbsp;
-            = button_to "Create Payment", new_client_payment_path(client_id: client.id)
+            = link_to "Create Payment", new_client_payment_path(client_id: client.id)
         td
           = link_to "Edit", edit_client_path(client)
           | &nbsp;
