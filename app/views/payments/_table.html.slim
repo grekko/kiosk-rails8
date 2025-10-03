@@ -3,6 +3,7 @@ table#payments
     th Client
     th Amount
     th State
+    th Created At
     th Settled At
     th Actions
   tbody
@@ -11,6 +12,7 @@ table#payments
         td= payment.client.name
         td= link_to formatted_price(payment.amount_in_cents), edit_payment_path(payment)
         td= payment.aasm_state
+        td= formatted_date(payment.created_at)
         td= formatted_date(payment.settled_at)
         td
           - if payment.draft?
