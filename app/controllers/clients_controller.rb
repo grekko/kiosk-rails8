@@ -2,7 +2,7 @@ class ClientsController < ApplicationController
   before_action :set_client, only: %i[ edit update suspend reinstate ]
 
   def index
-    @clients = Client.all
+    @clients = Client.all.order(suspended_at: :asc)
   end
 
   def new
