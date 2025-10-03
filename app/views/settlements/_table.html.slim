@@ -21,7 +21,7 @@ table#settlements
           td= formatted_date(settlement.generated_at)
           td= formatted_date(settlement.completed_at)
           td= formatted_date(settlement.paid_at)
-          td= link_to settlement.monthly_report.title, settlement.monthly_report
+          td= link_to settlement.monthly_report.title, edit_monthly_report_path(settlement.monthly_report)
           td
             - if settlement.draft?
               = button_to "Delete", settlement_path(settlement), method: :delete, data: { turbo_confirm: "Sure?" }
