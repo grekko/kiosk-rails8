@@ -41,9 +41,9 @@ table#clients
           = link_to "Settlements", filtered_settlements_path(client_id: client.id)
           | &nbsp;
           - if client.suspended?
-            = link_to "Reinstate", reinstate_client_path(client), method: :patch
+            = link_to "Reinstate", reinstate_client_path(client), data: { turbo_method: :patch }
           - else
-            = link_to "Suspend", suspend_client_path(client), method: :patch, data: { turbo_confirm: "Are you sure you want to suspend #{client.name}?" }
+            = link_to "Suspend", suspend_client_path(client), data: { turbo_method: :patch }
 
   tfoot
     tr
