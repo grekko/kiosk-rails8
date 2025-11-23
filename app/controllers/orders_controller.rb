@@ -33,10 +33,10 @@ class OrdersController < ApplicationController
   private
 
   def set_order
-    @order = Order.includes(positions: [ :drink ]).find(params.expect(:id))
+    @order = Order.includes(:invoice_attachment, positions: [ :drink ]).find(params.expect(:id))
   end
 
   def order_params
-    params.expect(order: [ :ordered_at ])
+    params.expect(order: [ :invoice, :ordered_at ])
   end
 end

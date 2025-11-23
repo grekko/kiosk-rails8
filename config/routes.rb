@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   resources :drinks, except: %i[show destroy]
 
   resources :clients, except: %i[destroy] do
+    member do
+      patch :suspend
+      patch :reinstate
+    end
     resources :payments, only: %i[new create]
   end
 
@@ -15,7 +19,7 @@ Rails.application.routes.draw do
     resources :positions, controller: "order_positions", except: %i[index show destroy]
   end
 
-  resources :monthly_reports, except: %i[destroy] do
+  resources :monthly_reports, except: %i[show destroy] do
     member do
       patch :complete_settlements
     end

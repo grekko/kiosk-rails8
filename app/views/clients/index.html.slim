@@ -11,7 +11,8 @@ table#clients
     th Open
     th Payment waiting
     th Paid
-    th Actions
+    th Create Payment
+    th Other
   tbody
     - @clients.each do |client|
       ruby:
@@ -22,18 +23,27 @@ table#clients
         settlements_total[:completed] += completed
         settlements_total[:payment_waiting] += payment_waiting
         settlements_total[:paid] += paid
-      tr
-        td= client.name
+      tr class="#{client.suspended? ? 'text-muted' : ''}"
+        td
+          = client.name
+          - if client.suspended?
+            |  (Suspended)
         td: strong= formatted_price(completed)
         td= formatted_price(payment_waiting)
         td= formatted_price(paid)
         td
-          = link_to "Edit", edit_client_path(client)
-          | &nbsp;
-          = link_to "Settlements", filtered_settlements_path(client_id: client.id)
           - if due.positive?
             | &nbsp;
             = link_to "Create Payment", new_client_payment_path(client_id: client.id)
+        td
+          = link_to "Edit", edit_client_path(client)
+          | &nbsp;
+          = link_to "Settlements", filtered_settlements_path(client_id: client.id)
+          | &nbsp;
+          - if client.suspended?
+            = link_to "Reinstate", reinstate_client_path(client), data: { turbo_method: :patch }
+          - else
+            = link_to "Suspend", suspend_client_path(client), data: { turbo_method: :patch }
 
   tfoot
     tr

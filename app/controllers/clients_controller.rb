@@ -1,8 +1,8 @@
 class ClientsController < ApplicationController
-  before_action :set_client, only: %i[ edit update ]
+  before_action :set_client, only: %i[ edit update suspend reinstate ]
 
   def index
-    @clients = Client.all
+    @clients = Client.all.order(suspended_at: :asc)
   end
 
   def new
@@ -28,6 +28,16 @@ class ClientsController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def suspend
+    @client.suspend!
+    redirect_to clients_path, notice: "#{@client.name} has been suspended."
+  end
+
+  def reinstate
+    @client.reinstate!
+    redirect_to clients_path, notice: "#{@client.name} has been reinstated."
   end
 
   private

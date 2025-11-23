@@ -1,10 +1,10 @@
 = simple_form_for order do |form|
   = form.input :ordered_at, html5: true
+  = form.input :invoice
   = form.button :submit
 
 - if order.persisted?
   h2 Positions
-
   table#positions
     thead
       th Drink
@@ -30,5 +30,7 @@
         td: strong= formatted_price(order.total_price_in_cents)
 
   h2 Add Position
-
-  = render "order_positions/form", position: @positions
+  div class=(order.invoice.attached? ? "order-form__positions" : "")
+    - if order.invoice.attached?
+      embed src=order.invoice.url type="application/pdf" width="850" height="1200"
+    = render "order_positions/form", position: @positions

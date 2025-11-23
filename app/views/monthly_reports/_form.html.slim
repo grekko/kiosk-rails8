@@ -14,9 +14,11 @@
         - @clients.each do |client|
           li= link_to client.name, new_settlement_path(client_id: client.id, monthly_report_id: monthly_report.id)
 
-      h3 Settled
+      h3 Settled (#{@settlements.size})
       ul
         - @settlements.each do |settlement|
           li= link_to settlement.client.name, edit_settlement_path(settlement)
+
+      h3 Overall Amount (#{monthly_report.overall_amount})
 
       = button_to "Mark as completed", complete_settlements_monthly_report_path(monthly_report), method: :patch, data: { turbo_confirm: "Sure?" }

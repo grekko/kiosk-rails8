@@ -4,7 +4,7 @@ ruby:
 
 = simple_form_for position, url: do |form|
   = form.input :drink_id, collection: Drink.all, include_blank: false
-  = form.input :amount, collection: 1..30, include_blank: false
+  = form.input :amount, collection: 1..99, include_blank: false
   = form.input :price_in_cents
   = form.input :deposit_in_cents
 

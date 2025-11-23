@@ -1,6 +1,7 @@
 class Order < ApplicationRecord
   validates :ordered_at, presence: true
 
+  has_one_attached :invoice
   has_many :positions, class_name: "OrderPosition", dependent: :destroy
 
   def price_in_cents
