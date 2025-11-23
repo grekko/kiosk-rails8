@@ -3,17 +3,13 @@ services:
   # Define the Rails application service
   rails-app:
     env_file:
-      - /volume1/docker/grekko.kiosk-rails8/.env
+      - .env
     # Build the Docker image for the Rails app
     build:
       context: .  # Specify the build context directory
       dockerfile: Dockerfile  # Specify the Dockerfile to use for building the image
     ports:
       - "3000:3000"  # Map port 3000 on the host to port 3000 in the container
-    environment:
-      RAILS_ENV: production  # Set the Rails environment to production
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}  # Set the Rails master key from an environment variable
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/syno_ror_production  # Set the database URL for the Rails app
     restart: unless-stopped  # Restart the container unless it is explicitly stopped
     volumes:
       - .:/rails  # Mount the host directory to the container's /rails directory
