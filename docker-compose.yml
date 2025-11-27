@@ -9,7 +9,16 @@ services:
       context: .  # Specify the build context directory
       dockerfile: Dockerfile  # Specify the Dockerfile to use for building the image
     ports:
-      - "3000:3000"  # Map port 3000 on the host to port 3000 in the container
+      - "3001:3001"  # Map port 3001 on the host to port 3001 in the container
     restart: unless-stopped  # Restart the container unless it is explicitly stopped
     volumes:
       - .:/rails  # Mount the host directory to the container's /rails directory
+      - db_data:/rails/storage
+
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /volume1/docker/data
+      o: bind

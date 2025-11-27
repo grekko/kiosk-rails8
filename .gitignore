@@ -28,6 +28,10 @@
 !/tmp/storage/
 !/tmp/storage/.keep
 
+# Keep cache and sockets directory
+!/tmp/cache/.keep
+!/tmp/sockets/.keep
+
 /public/assets
 
 # Ignore master key for decrypting credentials and more.
