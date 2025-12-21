@@ -35,6 +35,12 @@ module ApplicationHelper
     MESSAGE
   end
 
+  def lines_for_settlement(settlement)
+    settlement.positions.map do |position|
+      "#{position.amount} x #{position.drink.name} (#{formatted_price(position.drink_price_in_cents)})"
+    end
+  end
+
   def external?
     controller.class.ancestors.include?(External::BaseController)
   end
