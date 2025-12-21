@@ -27,15 +27,16 @@ html
 
   body
     header
-      nav
-        ol
-          li= link_to "Inventory", root_path
-          li= link_to "Clients", clients_path
-          li= link_to "Payments", payments_path
-          li= link_to "Drinks", drinks_path
-          li= link_to "Orders", orders_path
-          li= link_to "Monthly Reports", monthly_reports_path
-          li= link_to "Settlements", settlements_path
-          li= link_to "Prices", settlement_prices_path
+      - unless external?
+        nav
+          ol
+            li= link_to "Inventory", root_path
+            li= link_to "Clients", clients_path
+            li= link_to "Payments", payments_path
+            li= link_to "Drinks", drinks_path
+            li= link_to "Orders", orders_path
+            li= link_to "Monthly Reports", monthly_reports_path
+            li= link_to "Settlements", settlements_path
+            li= link_to "Prices", settlement_prices_path
 
     main= yield

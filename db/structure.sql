@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
-CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6) /*application='Kiosk'*/);
 CREATE TABLE IF NOT EXISTS "orders" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "ordered_at" date NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
 CREATE TABLE IF NOT EXISTS "order_positions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "order_id" integer NOT NULL, "drink_id" integer NOT NULL, "amount" integer DEFAULT 0 NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "deposit_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "total_price_in_cents"  GENERATED ALWAYS AS (price_in_cents + deposit_in_cents) VIRTUAL /*application='Kiosk'*/, CONSTRAINT "fk_rails_7dbe8a92c4"
 FOREIGN KEY ("drink_id")
@@ -58,7 +57,10 @@ FOREIGN KEY ("payment_id")
 CREATE INDEX "index_settlements_on_client_id" ON "settlements" ("client_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlements_on_monthly_report_id" ON "settlements" ("monthly_report_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlements_on_payment_id" ON "settlements" ("payment_id") /*application='Kiosk'*/;
+CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6), "access_uuid" text /*application='Kiosk'*/);
+CREATE UNIQUE INDEX "index_clients_on_access_uuid" ON "clients" ("access_uuid") /*application='Kiosk'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20251221192317'),
 ('20250905045403'),
 ('20250207171219'),
 ('20250207170802'),

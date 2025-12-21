@@ -4,6 +4,8 @@ class Payment < ApplicationRecord
   belongs_to :client
   has_many :settlements, dependent: :nullify
 
+  scope :newest_first, -> { order(id: :desc) }
+
   def self.build_for_client(client)
     record = new(client: client)
     record.settlements = client.settlements.completed.where.missing(:payment)

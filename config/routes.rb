@@ -9,6 +9,12 @@ Rails.application.routes.draw do
     resources :payments, only: %i[new create]
   end
 
+  namespace :external do
+    resources :client, param: :access_uuid, only: %i[show] do
+      resources :monthly_reports, only: %i[show]
+    end
+  end
+
   resources :payments, only: %i[index edit update] do
     member do
       patch :mark_settled

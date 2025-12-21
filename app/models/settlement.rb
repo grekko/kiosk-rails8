@@ -6,6 +6,8 @@ class Settlement < ApplicationRecord
   belongs_to :payment, optional: true
   has_many :positions, class_name: "SettlementPosition", dependent: :destroy
 
+  scope :newest_first, -> { order(generated_at: :desc) }
+
   validates :generated_at, presence: true
 
   aasm do

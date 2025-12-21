@@ -1,8 +1,10 @@
 class Client < ApplicationRecord
-  has_many :settlements
+  has_many :settlements, -> { newest_first }
   has_many :payments
 
   scope :active, -> { where(suspended_at: nil) }
+
+  before_create :set_access_uuid
 
   validates :name, presence: true
 
@@ -16,5 +18,11 @@ class Client < ApplicationRecord
 
   def reinstate!
     update(suspended_at: nil)
+  end
+
+  private
+
+  def set_access_uuid
+    self.access_uuid = SecureRandom.uuid
   end
 end

@@ -34,4 +34,8 @@ module ApplicationHelper
         DE91500105175411307099
     MESSAGE
   end
+
+  def external?
+    controller.class.ancestors.include?(External::BaseController)
+  end
 end

@@ -36,6 +36,9 @@ table#clients
             | &nbsp;
             = link_to "Create Payment", new_client_payment_path(client_id: client.id)
         td
+          - if client.access_uuid?
+            = link_to "External", external_client_url(client.access_uuid)
+            | &nbsp;
           = link_to "Edit", edit_client_path(client)
           | &nbsp;
           = link_to "Settlements", filtered_settlements_path(client_id: client.id)

@@ -1,0 +1,19 @@
+h1 Hallo #{@client.name}
+
+h2 Abrechnungen
+
+table#settlements
+  thead
+    th Month
+    th Amount
+    th Paid?
+  tbody
+    - @client.settlements.each do |settlement|
+      tr
+        td= link_to settlement.monthly_report.title, external_client_monthly_report_url(@client.access_uuid, settlement.monthly_report)
+        td= link_to formatted_price(settlement.price_in_cents), edit_settlement_path(settlement)
+        td
+          - if settlement.paid?
+            '👌🏽
+          - else
+            'no

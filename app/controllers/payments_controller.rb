@@ -3,7 +3,7 @@ class PaymentsController < ApplicationController
   before_action :set_payment, only: %i[ edit update mark_settled ]
 
   def index
-    @payments = Payment.order(id: :desc).all
+    @payments = Payment.newest_first.all
   end
 
   def new
