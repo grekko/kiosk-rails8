@@ -1,24 +1,35 @@
 h1 Hallo #{@client.name}
 
+p
+  'Auf deinem Deckel stehen aktuell
+  strong= formatted_price(@client.outstanding_payment_sum_in_cents)
+  br
+  'Du kannst die Rechnung gerne per SEPA oder #{link_to "PayPal-Link", paypal_payment_url(@client.outstanding_payment_sum_in_cents), target: :blank} begleichen.
+  br
+  strong IBAN
+  '&nbsp;
+  span DE91500105175411307099
+
 h2 Abrechnungen
 
-table#settlements
+table#settlements.striped
   thead
     th Month
     th Amount
     th Drinks
     th Paid?
   tbody
-    - @client.settlements.each do |settlement|
-      tr
-        td= link_to settlement.monthly_report.title, external_client_monthly_report_url(@client.access_uuid, settlement.monthly_report)
-        td= formatted_price(settlement.price_in_cents)
-        td
-          ul
-            - lines_for_settlement(settlement).each do |line|
-              li= line
-        td
-          - if settlement.paid?
-            '👌🏽
-          - else
-            'no
+    - @client.payments.each do |payment|
+      - payment.settlements.each do |settlement|
+        tr
+          td= link_to settlement.monthly_report.title, external_client_monthly_report_url(@client.access_uuid, settlement.monthly_report)
+          td= formatted_price(settlement.price_in_cents)
+          td
+            ul
+              - lines_for_settlement(settlement).each do |line|
+                li= line
+          td
+            - if settlement.paid?
+              '👌🏽
+            - else
+              '❌

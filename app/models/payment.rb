@@ -2,7 +2,7 @@ class Payment < ApplicationRecord
   include AASM
 
   belongs_to :client
-  has_many :settlements, dependent: :nullify
+  has_many :settlements, -> { newest_first }, dependent: :nullify
 
   scope :newest_first, -> { order(id: :desc) }
 

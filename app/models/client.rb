@@ -1,6 +1,6 @@
 class Client < ApplicationRecord
   has_many :settlements, -> { newest_first }
-  has_many :payments
+  has_many :payments, -> { newest_first }
 
   scope :active, -> { where(suspended_at: nil) }
 
@@ -18,6 +18,10 @@ class Client < ApplicationRecord
 
   def reinstate!
     update(suspended_at: nil)
+  end
+
+  def outstanding_payment_sum_in_cents
+    payments.draft.sum(&:amount_in_cents)
   end
 
   private

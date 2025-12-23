@@ -17,7 +17,7 @@ table#clients
     - @clients.each do |client|
       ruby:
         completed = client.settlements.completed.sum(&:price_in_cents)
-        payment_waiting = client.payments.draft.sum(&:amount_in_cents)
+        payment_waiting = client.outstanding_payment_sum_in_cents
         due = completed - payment_waiting
         paid = client.settlements.paid.sum(&:price_in_cents)
         settlements_total[:completed] += completed
