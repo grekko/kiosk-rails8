@@ -17,6 +17,7 @@ gem "slim-rails"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "aasm"
 gem "image_processing", ">= 1.2"
+gem "postmark-rails"
 
 ## Background Jobs, Cache
 gem "solid_cache"
