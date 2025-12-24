@@ -47,6 +47,6 @@ class ClientsController < ApplicationController
   end
 
   def client_params
-    params.expect(client: [ :name ])
+    params.expect(client: [ :name, :email ])
   end
 end

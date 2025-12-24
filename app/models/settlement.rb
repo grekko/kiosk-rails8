@@ -15,11 +15,11 @@ class Settlement < ApplicationRecord
     state :completed
     state :paid
 
-    event :complete, before: :set_completed_at do
+    event :complete, after: %(set_completed_at schedule_email) do
       transitions from: :draft, to: :completed
     end
 
-    event :mark_paid, before: :set_paid_at do
+    event :mark_paid, after: :set_paid_at do
       transitions from: :completed, to: :paid
     end
   end
@@ -36,5 +36,12 @@ class Settlement < ApplicationRecord
 
   def set_paid_at
     self.paid_at ||= Time.current
+  end
+
+  def schedule_email
+    return if email_sent_at? || client.email.blank?
+
+    SettlementMailer.with(settlement: settlement).completed_mail.deliver_later
+    update(email_sent_at: Time.current)
   end
 end

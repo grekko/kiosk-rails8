@@ -19,17 +19,16 @@ table#settlements.striped
     th Drinks
     th Paid?
   tbody
-    - @client.payments.each do |payment|
-      - payment.settlements.each do |settlement|
-        tr
-          td= link_to settlement.monthly_report.title, external_client_monthly_report_url(@client.access_uuid, settlement.monthly_report)
-          td= formatted_price(settlement.price_in_cents)
-          td
-            ul
-              - lines_for_settlement(settlement).each do |line|
-                li= line
-          td
-            - if settlement.paid?
-              '👌🏽
-            - else
-              '❌
+    - @client.settlements.each do |settlement|
+      tr
+        td= link_to settlement.monthly_report.title, external_client_monthly_report_url(@client.access_uuid, settlement.monthly_report)
+        td= formatted_price(settlement.price_in_cents)
+        td
+          ul
+            - lines_for_settlement(settlement).each do |line|
+              li= line
+        td
+          - if settlement.paid?
+            '👌🏽
+          - else
+            '❌

@@ -44,7 +44,7 @@ FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 );
 CREATE INDEX "index_payments_on_client_id" ON "payments" ("client_id") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, CONSTRAINT "fk_rails_4a7bf0e43f"
+CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, "email_sent_at" datetime(6) /*application='Kiosk'*/, CONSTRAINT "fk_rails_4a7bf0e43f"
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 , CONSTRAINT "fk_rails_5c7519b292"
@@ -57,9 +57,12 @@ FOREIGN KEY ("payment_id")
 CREATE INDEX "index_settlements_on_client_id" ON "settlements" ("client_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlements_on_monthly_report_id" ON "settlements" ("monthly_report_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlements_on_payment_id" ON "settlements" ("payment_id") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6), "access_uuid" text /*application='Kiosk'*/);
+CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6), "access_uuid" text /*application='Kiosk'*/, "email" text /*application='Kiosk'*/);
 CREATE UNIQUE INDEX "index_clients_on_access_uuid" ON "clients" ("access_uuid") /*application='Kiosk'*/;
+CREATE UNIQUE INDEX "index_clients_on_email" ON "clients" ("email") /*application='Kiosk'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20251224082432'),
+('20251224081714'),
 ('20251221192317'),
 ('20250905045403'),
 ('20250207171219'),

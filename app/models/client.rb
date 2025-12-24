@@ -3,10 +3,12 @@ class Client < ApplicationRecord
   has_many :payments, -> { newest_first }
 
   scope :active, -> { where(suspended_at: nil) }
+  scope :with_email, -> { where.not(email: nil) }
 
   before_create :set_access_uuid
 
   validates :name, presence: true
+  validates :email, uniqueness: true
 
   def suspended?
     suspended_at.present?

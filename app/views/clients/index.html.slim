@@ -8,6 +8,7 @@ h1 Clients
 table#clients
   thead
     th Name
+    th E-Mail
     th Open
     th Payment waiting
     th Paid
@@ -28,6 +29,7 @@ table#clients
           = client.name
           - if client.suspended?
             |  (Suspended)
+        td= client.email
         td: strong= formatted_price(completed)
         td= formatted_price(payment_waiting)
         td= formatted_price(paid)
