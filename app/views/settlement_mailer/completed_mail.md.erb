@@ -1,0 +1,8 @@
+Hallo <%= @client.name %>
+
+Die Abrechnung für <%= @report_title %> ist da. Auf deinem Deckel stehen aktuell **<%= formatted_price(@client.outstanding_payment_sum_in_cents) %>**.
+
+Du kannst die Rechnung gerne per [PayPal-Link](<%= paypal_payment_url(@client.outstanding_payment_sum_in_cents) %>) begleichen.
+oder SEPA-Überweisung (DE91500105175411307099) begleichen.
+
+Alle Details zu den Abrechnungen sind in [deinem Konto](<%= external_client_url(@client.access_uuid) %>).

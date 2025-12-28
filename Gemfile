@@ -12,6 +12,8 @@ gem "simple_form" # Rails forms made easy.
 gem "stimulus-rails" # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "turbo-rails" # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
 gem "slim-rails"
+gem "maildown" # Markdown for your ActionMailer-generated emails
+gem "redcarpet" # Markdown processor (solely used to generate plaintext versions)
 
 ## Utils
 gem "tzinfo-data", platforms: %i[ windows jruby ]
