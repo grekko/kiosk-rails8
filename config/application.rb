@@ -25,5 +25,7 @@ module Kiosk
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.active_record.schema_format = :sql
+
+    config.action_mailer.postmark_settings = { api_token: ENV["POSTMARK_API_TOKEN"] }
   end
 end

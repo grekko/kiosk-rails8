@@ -10,12 +10,17 @@ class Settlement < ApplicationRecord
 
   validates :generated_at, presence: true
 
+  with_options on: :email_delivery do
+    validates :email_sent_at, absence: true
+    validate :client_must_have_email
+  end
+
   aasm do
     state :draft, initial: true
     state :completed
     state :paid
 
-    event :complete, after: %(set_completed_at schedule_email) do
+    event :complete, after: %(set_completed_at) do
       transitions from: :draft, to: :completed
     end
 
@@ -28,7 +33,20 @@ class Settlement < ApplicationRecord
     positions.sum(:price_in_cents)
   end
 
+  def schedule_email_delivery
+    return false unless valid?(:email_delivery)
+
+    SettlementMailer.with(settlement: self).completed_mail.deliver_later
+    update(email_sent_at: Time.current)
+  end
+
   private
+
+  def client_must_have_email
+    return true if client.email.present?
+
+    errors.add(:base, "Client must have an email address")
+  end
 
   def set_completed_at
     self.completed_at ||= Time.current
@@ -36,12 +54,5 @@ class Settlement < ApplicationRecord
 
   def set_paid_at
     self.paid_at ||= Time.current
-  end
-
-  def schedule_email
-    return if email_sent_at? || client.email.blank?
-
-    SettlementMailer.with(settlement: settlement).completed_mail.deliver_later
-    update(email_sent_at: Time.current)
   end
 end

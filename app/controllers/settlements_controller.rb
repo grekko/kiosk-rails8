@@ -1,5 +1,5 @@
 class SettlementsController < ApplicationController
-  before_action :set_settlement, only: %i[ edit update destroy complete ]
+  before_action :set_settlement, only: %i[ edit update destroy complete schedule_email ]
 
   def index
     @settlements = Settlement.includes(:client, :monthly_report).newest_first.all
@@ -44,6 +44,14 @@ class SettlementsController < ApplicationController
   def complete
     @settlement.complete!
     redirect_to settlements_path
+  end
+
+  def schedule_email
+    if @settlement.schedule_email_delivery
+      flash[:notice] = "Email sent."
+    end
+
+    redirect_back_or_to settlements_path
   end
 
   def destroy

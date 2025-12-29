@@ -38,6 +38,7 @@ Rails.application.routes.draw do
 
     member do
       patch :complete
+      patch :schedule_email
     end
 
     resources :positions, controller: "settlement_positions", except: %i[index show]

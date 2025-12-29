@@ -6,22 +6,29 @@ table#settlements
     th Generated At
     th Completed At
     th Paid At
-    th Monthly Report
+    th Email Sent At
     th Actions
   tbody
     - settlements.group_by { |record| record.generated_at }.each do |date, settlements|
+      - monthly_report = settlements.first.monthly_report
       tr
-        td colspan="8" style="background-color: green; color: white;"
-          = l(date)
+        td colspan="8" style="background-color: #ededed;"
+          = link_to "#{monthly_report.title} (#{l(date)})", edit_monthly_report_path(monthly_report)
       - settlements.each do |settlement|
         tr
-          td= link_to settlement.client.name, filtered_settlements_path(client_id: settlement.client_id)
+          td
+            = link_to settlement.client.name, edit_client_path(settlement.client)
+            |&nbsp;
+            span= link_to "🔍", filtered_settlements_path(client_id: settlement.client_id)
           td= link_to formatted_price(settlement.price_in_cents), edit_settlement_path(settlement)
           td= settlement.aasm_state
           td= formatted_date(settlement.generated_at)
           td= formatted_date(settlement.completed_at)
           td= formatted_date(settlement.paid_at)
-          td= link_to settlement.monthly_report.title, edit_monthly_report_path(settlement.monthly_report)
+          td= formatted_date(settlement.email_sent_at)
           td
             - if settlement.draft?
               = button_to "Delete", settlement_path(settlement), method: :delete, data: { turbo_confirm: "Sure?" }
+            - else
+              - if settlement.valid?(:email_delivery)
+                = button_to "Send Mail", schedule_email_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }
