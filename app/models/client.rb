@@ -23,7 +23,7 @@ class Client < ApplicationRecord
   end
 
   def outstanding_payment_sum_in_cents
-    payments.draft.sum(&:amount_in_cents)
+    settlements.includes(:positions).completed.sum(&:price_in_cents)
   end
 
   private
