@@ -6,7 +6,7 @@ Rails.application.routes.draw do
       patch :suspend
       patch :reinstate
     end
-    resources :payments, only: %i[new create]
+    resources :payments, only: %i[create]
   end
 
   namespace :external do
@@ -15,11 +15,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :payments, only: %i[index edit update] do
-    member do
-      patch :mark_settled
-    end
-  end
+  resources :payments, only: %i[index]
 
   resources :orders, except: %i[show destroy] do
     resources :positions, controller: "order_positions", except: %i[index show destroy]

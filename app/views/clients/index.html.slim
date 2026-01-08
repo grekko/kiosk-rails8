@@ -31,7 +31,7 @@ table#clients
         td
           - if outstanding.positive?
             | &nbsp;
-            = link_to "Create Payment", new_client_payment_path(client_id: client.id)
+            = link_to "Create Payment", client_payments_path(client_id: client.id), data: { turbo_method: :post, turbo_confirm: "Sure?" }
         td
           - if client.access_uuid?
             = link_to "External", external_client_url(client.access_uuid)

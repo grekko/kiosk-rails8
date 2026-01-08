@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
+CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6) /*application='Kiosk'*/, "access_uuid" text, "email" text);
 CREATE TABLE IF NOT EXISTS "orders" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "ordered_at" date NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
 CREATE TABLE IF NOT EXISTS "order_positions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "order_id" integer NOT NULL, "drink_id" integer NOT NULL, "amount" integer DEFAULT 0 NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "deposit_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "total_price_in_cents"  GENERATED ALWAYS AS (price_in_cents + deposit_in_cents) VIRTUAL /*application='Kiosk'*/, CONSTRAINT "fk_rails_7dbe8a92c4"
 FOREIGN KEY ("drink_id")
@@ -39,12 +40,7 @@ FOREIGN KEY ("blob_id")
   REFERENCES "active_storage_blobs" ("id")
 );
 CREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "payments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "amount_in_cents" integer DEFAULT 0 NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "settled_at" datetime(6), "note" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_66d0485df7"
-FOREIGN KEY ("client_id")
-  REFERENCES "clients" ("id")
-);
-CREATE INDEX "index_payments_on_client_id" ON "payments" ("client_id") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, "email_sent_at" datetime(6) /*application='Kiosk'*/, CONSTRAINT "fk_rails_4a7bf0e43f"
+CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, "email_sent_at" datetime(6), CONSTRAINT "fk_rails_4a7bf0e43f"
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 , CONSTRAINT "fk_rails_5c7519b292"
@@ -57,10 +53,15 @@ FOREIGN KEY ("payment_id")
 CREATE INDEX "index_settlements_on_client_id" ON "settlements" ("client_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlements_on_monthly_report_id" ON "settlements" ("monthly_report_id") /*application='Kiosk'*/;
 CREATE INDEX "index_settlements_on_payment_id" ON "settlements" ("payment_id") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6), "access_uuid" text /*application='Kiosk'*/, "email" text /*application='Kiosk'*/);
-CREATE UNIQUE INDEX "index_clients_on_access_uuid" ON "clients" ("access_uuid") /*application='Kiosk'*/;
-CREATE UNIQUE INDEX "index_clients_on_email" ON "clients" ("email") /*application='Kiosk'*/;
+CREATE UNIQUE INDEX "index_clients_on_access_uuid" ON "clients" ("access_uuid");
+CREATE UNIQUE INDEX "index_clients_on_email" ON "clients" ("email");
+CREATE TABLE IF NOT EXISTS "payments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "amount_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_66d0485df7"
+FOREIGN KEY ("client_id")
+  REFERENCES "clients" ("id")
+);
+CREATE INDEX "index_payments_on_client_id" ON "payments" ("client_id") /*application='Kiosk'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20260108174900'),
 ('20251224082432'),
 ('20251224081714'),
 ('20251221192317'),
