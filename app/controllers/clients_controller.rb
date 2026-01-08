@@ -32,12 +32,12 @@ class ClientsController < ApplicationController
 
   def suspend
     @client.suspend!
-    redirect_to clients_path, notice: "#{@client.name} has been suspended."
+    redirect_to clients_path
   end
 
   def reinstate
     @client.reinstate!
-    redirect_to clients_path, notice: "#{@client.name} has been reinstated."
+    redirect_to clients_path
   end
 
   private
