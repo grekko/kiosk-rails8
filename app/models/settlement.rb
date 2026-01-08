@@ -7,7 +7,6 @@ class Settlement < ApplicationRecord
   has_many :positions, class_name: "SettlementPosition", dependent: :destroy
 
   scope :newest_first, -> { order(generated_at: :desc) }
-  scope :unpaid, -> { where(aasm_state: %w[draft completed]) }
 
   validates :generated_at, presence: true
 

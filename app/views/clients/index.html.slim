@@ -9,20 +9,16 @@ table#clients
   thead
     th Name
     th E-Mail
-    th Open
-    th Payment waiting
+    th Outstanding
     th Paid
     th Create Payment
     th Other
   tbody
     - @clients.each do |client|
       ruby:
-        completed = client.settlements.completed.sum(&:price_in_cents)
-        payment_waiting = client.outstanding_payment_sum_in_cents
-        due = completed - payment_waiting
+        outstanding = client.outstanding_payment_sum_in_cents
         paid = client.settlements.paid.sum(&:price_in_cents)
-        settlements_total[:completed] += completed
-        settlements_total[:payment_waiting] += payment_waiting
+        settlements_total[:outstanding] += outstanding
         settlements_total[:paid] += paid
       tr class="#{client.suspended? ? 'text-muted' : ''}"
         td
@@ -30,11 +26,10 @@ table#clients
           - if client.suspended?
             |  (Suspended)
         td= client.email
-        td: strong= formatted_price(completed)
-        td= formatted_price(payment_waiting)
+        td: strong = formatted_price(outstanding)
         td= formatted_price(paid)
         td
-          - if due.positive?
+          - if outstanding.positive?
             | &nbsp;
             = link_to "Create Payment", new_client_payment_path(client_id: client.id)
         td
@@ -54,7 +49,6 @@ table#clients
     tr
       th Totals
       td
-        strong = formatted_price(settlements_total[:completed])
-      td = formatted_price(settlements_total[:payment_waiting])
+      td: strong = formatted_price(settlements_total[:outstanding])
       td = formatted_price(settlements_total[:paid])
       th
