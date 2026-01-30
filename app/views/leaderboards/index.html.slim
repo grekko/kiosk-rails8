@@ -1,0 +1,23 @@
+h1 Leaderboards
+
+- if @leaderboards.empty?
+  article
+    p No paid settlements found yet.
+- else
+  div.grid
+    - @leaderboards.each do |drink_name, entries|
+      article
+        header
+          strong = drink_name
+        table.striped
+          thead
+            tr
+              th Rank
+              th Client
+              th Quantity
+          tbody
+            - entries.each_with_index do |entry, index|
+              tr
+                td = index + 1
+                td = entry[:client]
+                td = entry[:count]
