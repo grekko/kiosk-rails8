@@ -8,7 +8,7 @@ class Client < ApplicationRecord
   before_create :set_access_uuid
 
   validates :name, presence: true
-  validates :email, uniqueness: true
+  validates :email, uniqueness: true, allow_blank: true
 
   def suspended?
     suspended_at.present?
