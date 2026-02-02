@@ -16,10 +16,12 @@ gem "maildown" # Markdown for your ActionMailer-generated emails
 gem "redcarpet" # Markdown processor (solely used to generate plaintext versions)
 
 ## Utils
-gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "aasm"
 gem "image_processing", ">= 1.2"
 gem "postmark-rails"
+gem "sentry-rails"
+gem "sentry-ruby"
+gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 ## Background Jobs, Cache
 gem "solid_cache"
