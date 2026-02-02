@@ -7,5 +7,5 @@ table#payments
     - payments.each do |payment|
       tr
         td= payment.client.name
-        td= link_to formatted_price(payment.amount_in_cents), edit_payment_path(payment)
+        td= formatted_price(payment.amount_in_cents)
         td= formatted_date(payment.created_at)
