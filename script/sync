@@ -4,5 +4,5 @@ set -e
 
 cd "$(dirname "$0")/../storage"
 
-scp -O -P 222 -rp dsm:/volume1/docker/grekko.kiosk-rails8/storage/* .
+scp -O -P 222 -rp diskstation:/volume1/docker/grekko.kiosk-rails8/storage/* .
 mv production.sqlite3 development.sqlite3

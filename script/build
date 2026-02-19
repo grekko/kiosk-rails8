@@ -3,5 +3,5 @@
 set -e
 
 docker build --platform linux/x86_64 -t kiosk .
-docker image tag kiosk diskstation.local:5005/kiosk
-docker image push diskstation.local:5005/kiosk
+docker image tag kiosk diskstation:5005/kiosk
+docker image push diskstation:5005/kiosk
