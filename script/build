@@ -2,6 +2,22 @@
 
 set -e
 
-docker build --platform linux/x86_64 -t kiosk .
-docker image tag kiosk diskstation:5005/kiosk
-docker image push diskstation:5005/kiosk
+REGISTRY="diskstation:5005"
+IMAGE="kiosk"
+SHA="$(git rev-parse --short HEAD)"
+
+if ! git diff --quiet HEAD; then
+  echo "Working tree dirty — commit before building." >&2
+  exit 1
+fi
+
+docker build --platform linux/x86_64 -t "$IMAGE:$SHA" .
+docker image tag "$IMAGE:$SHA" "$REGISTRY/$IMAGE:$SHA"
+docker image tag "$IMAGE:$SHA" "$REGISTRY/$IMAGE:latest"
+
+docker image push "$REGISTRY/$IMAGE:$SHA"
+docker image push "$REGISTRY/$IMAGE:latest"
+
+echo
+echo "Pushed $REGISTRY/$IMAGE:$SHA"
+echo "Update Portainer stack image reference to this tag and redeploy."
