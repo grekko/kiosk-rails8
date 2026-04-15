@@ -57,14 +57,11 @@ The dirty-tree guard prevents builds that can't be traced back to a single commi
 2. Run `script/deploy`. It:
    - runs `script/build` (build + push SHA + latest to registry),
    - updates `KIOSK_TAG` in `grekko.dsm/portainer-stacks/kiosk/stack.env`,
-   - commits and pushes the stack repo,
-   - triggers the Portainer webhook if `PORTAINER_KIOSK_WEBHOOK` is set.
+   - commits and pushes the stack repo.
+
+Portainer redeploys on its next git-poll interval.
 
 The stack compose file references `image: 192.168.178.35:5005/kiosk:${KIOSK_TAG}` — only `stack.env` changes per deploy, so diffs stay clean.
-
-### Webhook (optional)
-
-Portainer → Stacks → `kiosk` → Webhook → create → copy URL → export as `PORTAINER_KIOSK_WEBHOOK` (e.g. in `.envrc`). Without it the stack redeploys on Portainer's next git pull interval; with it, redeploy is immediate.
 
 ## Rollback
 

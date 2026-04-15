@@ -23,14 +23,5 @@ sed -i '' -E "s|^KIOSK_TAG=.*|KIOSK_TAG=$SHA|" "$STACK_ENV"
 git -C "$STACK_REPO" commit -m "Deploy kiosk $SHA" -- portainer-stacks/kiosk/stack.env
 git -C "$STACK_REPO" push
 
-if [ -n "$PORTAINER_KIOSK_WEBHOOK" ]; then
-  echo
-  echo "Triggering Portainer webhook…"
-  curl -fsS -X POST "$PORTAINER_KIOSK_WEBHOOK" && echo "Webhook triggered."
-else
-  echo
-  echo "Set PORTAINER_KIOSK_WEBHOOK to auto-trigger Portainer redeploy."
-fi
-
 echo
-echo "Deployed kiosk:$SHA"
+echo "Pushed kiosk:$SHA. Portainer will redeploy on its next git poll."

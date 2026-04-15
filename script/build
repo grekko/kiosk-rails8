@@ -11,7 +11,7 @@ if ! git diff --quiet HEAD; then
   exit 1
 fi
 
-docker build --platform linux/x86_64 -t "$IMAGE:$SHA" .
+docker build --platform linux/x86_64 --build-arg "KIOSK_SHA=$SHA" -t "$IMAGE:$SHA" .
 docker image tag "$IMAGE:$SHA" "$REGISTRY/$IMAGE:$SHA"
 docker image tag "$IMAGE:$SHA" "$REGISTRY/$IMAGE:latest"
 

@@ -39,3 +39,11 @@ plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+
+on_booted do
+  next unless Rails.env.production?
+
+  DeployMailer.booted(sha: ENV.fetch("KIOSK_SHA", "unknown")).deliver_now
+rescue => e
+  Rails.logger.warn("DeployMailer failed: #{e.class}: #{e.message}")
+end

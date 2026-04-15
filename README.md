@@ -16,9 +16,7 @@ Each build is tagged with the short git SHA so deploys reference an immutable im
 ### Deploy
 
 1. Commit all changes.
-2. Run `script/deploy`. Builds + pushes SHA-tagged image, bumps `KIOSK_TAG` in the stack repo's `stack.env`, commits + pushes, and (optionally) triggers a Portainer webhook for immediate redeploy.
-
-Set `PORTAINER_KIOSK_WEBHOOK` in your env (e.g. `.envrc`) to auto-trigger Portainer. Without it, Portainer redeploys on its next git pull.
+2. Run `script/deploy`. Builds + pushes SHA-tagged image, bumps `KIOSK_TAG` in the stack repo's `stack.env`, commits + pushes. Portainer redeploys on its next git-poll interval.
 
 ### Rollback
 
