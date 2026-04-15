@@ -32,9 +32,21 @@ module ApplicationHelper
   end
 
   def paypal_payment_url(amount_in_cents)
-    <<~MESSAGE
-      https://paypal.me/gregoryigelmund/#{(amount_in_cents/100.to_f).round(2)}
-    MESSAGE
+    "https://paypal.me/gregoryigelmund/#{(amount_in_cents / 100.to_f).round(2)}"
+  end
+
+  def rounded_up_full_euro_in_cents(amount_in_cents)
+    amount = amount_in_cents.to_i
+    return 0 if amount <= 0
+
+    ((amount / 100) + 1) * 100
+  end
+
+  def round_up_delta_in_cents(amount_in_cents)
+    amount = amount_in_cents.to_i
+    return 0 if amount <= 0
+
+    rounded_up_full_euro_in_cents(amount) - amount
   end
 
   def payment_drinks_lines(payment)

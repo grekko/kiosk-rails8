@@ -1,14 +1,53 @@
 h1 Hallo #{@client.name} 🎉
 
+ruby:
+  outstanding_in_cents = @client.outstanding_payment_sum_in_cents
+  rounded_up_in_cents = rounded_up_full_euro_in_cents(outstanding_in_cents)
+
 p
   'Auf deinem Deckel stehen aktuell
-  strong= formatted_price(@client.outstanding_payment_sum_in_cents)
-  br
-  'Du kannst die Rechnung gerne per SEPA oder #{link_to "PayPal-Link", paypal_payment_url(@client.outstanding_payment_sum_in_cents), target: :blank} begleichen.
-  br
-  strong IBAN
-  '&nbsp;
-  span DE91500105175411307099
+  strong= formatted_price(outstanding_in_cents)
+
+- if outstanding_in_cents.positive?
+  .roundup[data-exact-price=formatted_price(outstanding_in_cents)
+           data-rounded-price=formatted_price(rounded_up_in_cents)
+           data-exact-url=paypal_payment_url(outstanding_in_cents)
+           data-rounded-url=paypal_payment_url(rounded_up_in_cents)]
+    .roundup__amount
+      .roundup__row
+        span.roundup__price = formatted_price(outstanding_in_cents)
+        '&nbsp;|&nbsp;
+        = link_to "PayPal-Link", paypal_payment_url(outstanding_in_cents), target: :blank, class: "roundup__link"
+        span.roundup__sparkle ✨
+      .roundup__row
+        strong IBAN
+        '&nbsp;
+        span DE91500105175411307099
+      p.roundup__hint Du kannst die Rechnung gerne exakt begleichen oder aufrunden.
+      label.roundup__toggle
+        input.roundup__checkbox type="checkbox"
+        '&nbsp;Aufrunden?
+
+  javascript:
+    (() => {
+      const root = document.querySelector('.roundup');
+      if (!root) return;
+      const checkbox = root.querySelector('.roundup__checkbox');
+      const price = root.querySelector('.roundup__price');
+      const link = root.querySelector('.roundup__link');
+      const amount = root.querySelector('.roundup__amount');
+
+      const apply = (rounded) => {
+        price.textContent = rounded ? root.dataset.roundedPrice : root.dataset.exactPrice;
+        link.href = rounded ? root.dataset.roundedUrl : root.dataset.exactUrl;
+        root.classList.toggle('roundup--on', rounded);
+        amount.classList.remove('roundup__amount--pop');
+        void amount.offsetWidth;
+        if (rounded) amount.classList.add('roundup__amount--pop');
+      };
+
+      checkbox.addEventListener('change', (e) => apply(e.target.checked));
+    })();
 
 h2 Abrechnungen
 
