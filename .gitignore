@@ -38,5 +38,7 @@
 /config/master.key
 
 .DS_Store
+.claude-instance.lock
+mise.toml
 
 /config/credentials/production.key
