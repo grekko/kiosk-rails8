@@ -37,16 +37,13 @@ module ApplicationHelper
 
   def rounded_up_full_euro_in_cents(amount_in_cents)
     amount = amount_in_cents.to_i
-    return 0 if amount <= 0
+    return 0 unless amount.positive?
 
-    ((amount / 100) + 1) * 100
+    (amount + 1).ceildiv(100) * 100
   end
 
   def round_up_delta_in_cents(amount_in_cents)
-    amount = amount_in_cents.to_i
-    return 0 if amount <= 0
-
-    rounded_up_full_euro_in_cents(amount) - amount
+    rounded_up_full_euro_in_cents(amount_in_cents) - amount_in_cents.to_i.clamp(0..)
   end
 
   def payment_drinks_lines(payment)

@@ -48,6 +48,26 @@
   font-weight: 600;
 }
 
+.roundup__toggle input[type="checkbox"] {
+  margin: 0;
+  vertical-align: middle;
+}
+
+.roundup__toggle--generous {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 300ms ease, max-height 300ms ease;
+}
+
+.roundup--on .roundup__toggle--generous {
+  opacity: 1;
+  max-height: 2em;
+  pointer-events: auto;
+}
+
 .roundup__amount {
   position: relative;
   display: inline-flex;
@@ -84,6 +104,12 @@
 
 .roundup--on .roundup__sparkle {
   opacity: 1;
+  animation: roundup-sparkle 1.2s ease-in-out infinite;
+}
+
+@keyframes roundup-sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.4) rotate(20deg); }
 }
 
 @property --roundup-angle {
@@ -94,7 +120,7 @@
 
 .roundup--on .roundup__amount {
   color: #15803d;
-  border: 2px solid transparent;
+  border-color: transparent;
   background:
     linear-gradient(#dcfce7, #dcfce7) padding-box,
     conic-gradient(from var(--roundup-angle), #16a34a, #22d3ee, #a855f7, #f59e0b, #16a34a) border-box;
@@ -110,22 +136,35 @@
   font-weight: 700;
 }
 
-.roundup__sparkle {
-  display: inline-block;
-  margin-left: 4px;
-}
-
-.roundup--on .roundup__sparkle {
-  animation: roundup-sparkle 1.2s ease-in-out infinite;
-}
-
 @keyframes roundup-sparkle {
   0%, 100% { transform: scale(1) rotate(0deg); }
   50% { transform: scale(1.4) rotate(20deg); }
 }
 
+.roundup--generous .roundup__amount {
+  border-width: 5px;
+  padding: 10px 44px 10px 14px;
+}
+
+.roundup--generous .roundup__sparkle {
+  font-size: 2.4em;
+  top: 2px;
+  right: 10px;
+}
+
 .roundup__amount--pop {
   animation: roundup-pop 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.roundup .roundup__amount--jump {
+  animation: roundup-jump 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes roundup-jump {
+  0% { transform: scale(1) translateY(0); }
+  40% { transform: scale(1.35) translateY(-10px); }
+  70% { transform: scale(0.95) translateY(0); }
+  100% { transform: scale(1) translateY(0); }
 }
 
 @keyframes roundup-pop {
