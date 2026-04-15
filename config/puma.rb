@@ -43,7 +43,9 @@ pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
 on_booted do
   next unless Rails.env.production?
 
-  DeployMailer.booted(sha: ENV.fetch("KIOSK_SHA", "unknown")).deliver_now
+  Timeout.timeout(10) do
+    DeployMailer.booted(sha: ENV.fetch("KIOSK_SHA", "unknown")).deliver_now
+  end
 rescue => e
-  Rails.logger.warn("DeployMailer failed: #{e.class}: #{e.message}")
+  Rails.logger.error("DeployMailer failed: #{e.full_message}")
 end
