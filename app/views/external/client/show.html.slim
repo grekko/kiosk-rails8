@@ -1,14 +1,93 @@
 h1 Hallo #{@client.name} 🎉
 
+ruby:
+  generous_bonus_in_cents = 100
+  outstanding_in_cents = @client.outstanding_payment_sum_in_cents
+  rounded_up_in_cents = rounded_up_full_euro_in_cents(outstanding_in_cents)
+  exact_generous_in_cents = outstanding_in_cents + generous_bonus_in_cents
+  rounded_generous_in_cents = rounded_up_in_cents + generous_bonus_in_cents
+  exact_price = formatted_price(outstanding_in_cents)
+  rounded_price = formatted_price(rounded_up_in_cents)
+  exact_generous_price = formatted_price(exact_generous_in_cents)
+  rounded_generous_price = formatted_price(rounded_generous_in_cents)
+  exact_url = paypal_payment_url(outstanding_in_cents)
+  rounded_url = paypal_payment_url(rounded_up_in_cents)
+  exact_generous_url = paypal_payment_url(exact_generous_in_cents)
+  rounded_generous_url = paypal_payment_url(rounded_generous_in_cents)
+
 p
   'Auf deinem Deckel stehen aktuell
-  strong= formatted_price(@client.outstanding_payment_sum_in_cents)
-  br
-  'Du kannst die Rechnung gerne per SEPA oder #{link_to "PayPal-Link", paypal_payment_url(@client.outstanding_payment_sum_in_cents), target: :blank} begleichen.
-  br
-  strong IBAN
-  '&nbsp;
-  span DE91500105175411307099
+  strong= exact_price
+
+- if outstanding_in_cents.positive?
+  .roundup[data-exact-price=exact_price
+           data-rounded-price=rounded_price
+           data-exact-generous-price=exact_generous_price
+           data-rounded-generous-price=rounded_generous_price
+           data-exact-url=exact_url
+           data-rounded-url=rounded_url
+           data-exact-generous-url=exact_generous_url
+           data-rounded-generous-url=rounded_generous_url]
+    .roundup__amount
+      .roundup__row
+        span.roundup__price = exact_price
+        '&nbsp;|&nbsp;
+        = link_to "PayPal-Link", exact_url, target: :blank, class: "roundup__link"
+        span.roundup__sparkle ✨
+      .roundup__row
+        strong IBAN
+        '&nbsp;
+        span DE91500105175411307099
+      p.roundup__hint Du kannst die Rechnung gerne exakt begleichen oder aufrunden.
+      label.roundup__toggle
+        input.roundup__checkbox type="checkbox"
+        '&nbsp;Aufrunden/Trinkgeld?
+      label.roundup__toggle.roundup__toggle--generous
+        input.roundup__generous-checkbox type="checkbox"
+        '&nbsp;besonders großzügig heute
+
+  javascript:
+    (() => {
+      const root = document.querySelector('.roundup');
+      if (!root) return;
+      const roundupBox = root.querySelector('.roundup__checkbox');
+      const generousBox = root.querySelector('.roundup__generous-checkbox');
+      const price = root.querySelector('.roundup__price');
+      const link = root.querySelector('.roundup__link');
+      const amount = root.querySelector('.roundup__amount');
+
+      const apply = () => {
+        const rounded = roundupBox.checked;
+        if (!rounded) generousBox.checked = false;
+        const generous = generousBox.checked;
+        const key = (rounded ? 'rounded' : 'exact') + (generous ? 'Generous' : '');
+        price.textContent = root.dataset[`${key}Price`];
+        link.href = root.dataset[`${key}Url`];
+        root.classList.toggle('roundup--on', rounded);
+        root.classList.toggle('roundup--generous', generous);
+        amount.classList.remove('roundup__amount--pop');
+        void amount.offsetWidth;
+        amount.classList.add('roundup__amount--pop');
+      };
+
+      const jump = () => {
+        amount.classList.remove('roundup__amount--jump');
+        void amount.offsetWidth;
+        amount.classList.add('roundup__amount--jump');
+      };
+
+      amount.addEventListener('animationend', (e) => {
+        if (e.animationName === 'roundup-jump') {
+          amount.classList.remove('roundup__amount--jump');
+        }
+      });
+
+      roundupBox.addEventListener('change', apply);
+      generousBox.addEventListener('change', () => {
+        if (generousBox.checked) jump();
+        apply();
+      });
+    })();
 
 h2 Abrechnungen
 
