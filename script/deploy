@@ -1,0 +1,36 @@
+#!/bin/sh
+
+set -e
+
+STACK_REPO="$(cd "$(dirname "$0")/../../grekko.dsm" && pwd)"
+STACK_ENV="$STACK_REPO/portainer-stacks/kiosk/stack.env"
+SHA="$(git rev-parse --short HEAD)"
+
+if ! git diff --quiet HEAD; then
+  echo "Working tree dirty — commit before deploying." >&2
+  exit 1
+fi
+
+if [ ! -f "$STACK_ENV" ]; then
+  echo "Stack env not found at $STACK_ENV" >&2
+  exit 1
+fi
+
+"$(dirname "$0")/build"
+
+sed -i '' -E "s|^KIOSK_TAG=.*|KIOSK_TAG=$SHA|" "$STACK_ENV"
+
+git -C "$STACK_REPO" commit -m "Deploy kiosk $SHA" -- portainer-stacks/kiosk/stack.env
+git -C "$STACK_REPO" push
+
+if [ -n "$PORTAINER_KIOSK_WEBHOOK" ]; then
+  echo
+  echo "Triggering Portainer webhook…"
+  curl -fsS -X POST "$PORTAINER_KIOSK_WEBHOOK" && echo "Webhook triggered."
+else
+  echo
+  echo "Set PORTAINER_KIOSK_WEBHOOK to auto-trigger Portainer redeploy."
+fi
+
+echo
+echo "Deployed kiosk:$SHA"
