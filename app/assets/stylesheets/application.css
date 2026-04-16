@@ -42,8 +42,11 @@ th.amount {
   white-space: nowrap;
 }
 
-/* Settlement group header (grouped by monthly report). */
-.settlement-group-header td {
+/* Settlement group header (grouped by monthly report).
+   Selector specificity must beat `.table-sticky-first td:first-child`
+   so the header background isn't overridden on the first cell. */
+.settlement-group-header td,
+.table-sticky-first .settlement-group-header td:first-child {
   background: #ededed;
 }
 .settlement-group-header__row {

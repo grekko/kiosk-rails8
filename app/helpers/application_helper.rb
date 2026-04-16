@@ -7,11 +7,12 @@ module ApplicationHelper
 
   def settlement_status_emoji(settlement)
     state = settlement.aasm_state.to_s
+    label = state.humanize
     content_tag(
       :span,
       SETTLEMENT_STATUS_EMOJI.fetch(state, state),
-      title: state.humanize,
-      "aria-label": state
+      title: label,
+      "aria-label": label
     )
   end
 
