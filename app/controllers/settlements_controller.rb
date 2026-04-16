@@ -7,7 +7,7 @@ class SettlementsController < ApplicationController
 
   def filtered
     @client = Client.find(params[:client_id])
-    @settlements = Settlement.where(client: @client).newest_first.all
+    @settlements = Settlement.where(client: @client).includes(:client, :monthly_report).newest_first.all
   end
 
   def new

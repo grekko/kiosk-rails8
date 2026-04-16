@@ -9,8 +9,6 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
-/* Horizontally scrollable table wrapper.
-   Keeps wide tables from stretching the page on narrow screens. */
 .table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -38,14 +36,12 @@
   z-index: 2;
 }
 
-/* Monetary cells should never wrap. */
 .amount,
 td.amount,
 th.amount {
   white-space: nowrap;
 }
 
-/* Settlement group header (grouped by monthly report). */
 .settlement-group-header td {
   background: #ededed;
 }
@@ -65,7 +61,6 @@ th.amount {
   font-size: 0.9em;
 }
 
-/* Nav: wrap links instead of overflowing on narrow screens. */
 header nav ol {
   display: flex;
   flex-wrap: wrap;
@@ -73,7 +68,6 @@ header nav ol {
   padding-left: 0;
 }
 
-/* Mobile tweaks. */
 @media (max-width: 768px) {
   .table-wrap :is(th, td) {
     padding: 0.4rem 0.5rem;
