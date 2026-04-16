@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   resources :monthly_reports, except: %i[show destroy] do
     member do
       patch :complete_settlements
+      patch :schedule_settlement_emails
     end
   end
 

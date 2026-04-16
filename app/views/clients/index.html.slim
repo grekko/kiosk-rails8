@@ -5,50 +5,51 @@ h1 Clients
 
 = link_to "New Client", new_client_path
 
-table#clients
-  thead
-    th Name
-    th E-Mail
-    th Outstanding
-    th Paid
-    th Create Payment
-    th Other
-  tbody
-    - @clients.each do |client|
-      ruby:
-        outstanding = client.outstanding_payment_sum_in_cents
-        paid = client.settlements.paid.sum(&:price_in_cents)
-        settlements_total[:outstanding] += outstanding
-        settlements_total[:paid] += paid
-      tr class="#{client.suspended? ? 'text-muted' : ''}"
-        td
-          = client.name
-          - if client.suspended?
-            |  (Suspended)
-        td= client.email
-        td: strong = formatted_price(outstanding)
-        td= formatted_price(paid)
-        td
-          - if outstanding.positive?
+.table-wrap
+  table#clients.table-sticky-first
+    thead
+      th Name
+      th E-Mail
+      th.amount Outstanding
+      th.amount Paid
+      th Create Payment
+      th Other
+    tbody
+      - @clients.each do |client|
+        ruby:
+          outstanding = client.outstanding_payment_sum_in_cents
+          paid = client.settlements.paid.sum(&:price_in_cents)
+          settlements_total[:outstanding] += outstanding
+          settlements_total[:paid] += paid
+        tr class="#{client.suspended? ? 'text-muted' : ''}"
+          td
+            = client.name
+            - if client.suspended?
+              |  (Suspended)
+          td= client.email
+          td.amount: strong = formatted_price(outstanding)
+          td.amount= formatted_price(paid)
+          td
+            - if outstanding.positive?
+              | &nbsp;
+              = link_to "Create Payment", client_payments_path(client_id: client.id), data: { turbo_method: :post, turbo_confirm: "Sure?" }
+          td
+            - if client.access_uuid?
+              = link_to "External", external_client_url(client.access_uuid)
+              | &nbsp;
+            = link_to "Edit", edit_client_path(client)
             | &nbsp;
-            = link_to "Create Payment", client_payments_path(client_id: client.id), data: { turbo_method: :post, turbo_confirm: "Sure?" }
-        td
-          - if client.access_uuid?
-            = link_to "External", external_client_url(client.access_uuid)
+            = link_to "Settlements", filtered_settlements_path(client_id: client.id)
             | &nbsp;
-          = link_to "Edit", edit_client_path(client)
-          | &nbsp;
-          = link_to "Settlements", filtered_settlements_path(client_id: client.id)
-          | &nbsp;
-          - if client.suspended?
-            = link_to "Reinstate", reinstate_client_path(client), data: { turbo_method: :patch }
-          - else
-            = link_to "Suspend", suspend_client_path(client), data: { turbo_method: :patch }
+            - if client.suspended?
+              = link_to "Reinstate", reinstate_client_path(client), data: { turbo_method: :patch }
+            - else
+              = link_to "Suspend", suspend_client_path(client), data: { turbo_method: :patch }
 
-  tfoot
-    tr
-      th Totals
-      td
-      td: strong = formatted_price(settlements_total[:outstanding])
-      td = formatted_price(settlements_total[:paid])
-      th
+    tfoot
+      tr
+        th Totals
+        td
+        td.amount: strong = formatted_price(settlements_total[:outstanding])
+        td.amount = formatted_price(settlements_total[:paid])
+        th colspan="2"

@@ -1,11 +1,12 @@
-table#payments
-  thead
-    th Client
-    th Amount
-    th Created At
-  tbody
-    - payments.each do |payment|
-      tr
-        td= payment.client.name
-        td= formatted_price(payment.amount_in_cents)
-        td= formatted_date(payment.created_at)
+.table-wrap
+  table#payments.table-sticky-first
+    thead
+      th Client
+      th.amount Amount
+      th Created At
+    tbody
+      - payments.each do |payment|
+        tr
+          td= payment.client.name
+          td.amount= formatted_price(payment.amount_in_cents)
+          td= formatted_date(payment.created_at)

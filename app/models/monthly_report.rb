@@ -11,4 +11,8 @@ class MonthlyReport < ApplicationRecord
       settlement.complete!
     end
   end
+
+  def schedule_settlement_emails!
+    settlements.where.not(aasm_state: :draft).includes(:client).find_each.count(&:schedule_email_delivery)
+  end
 end

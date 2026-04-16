@@ -1,4 +1,21 @@
 module ApplicationHelper
+  SETTLEMENT_STATUS_EMOJI = {
+    "draft" => "📝",
+    "completed" => "✅",
+    "paid" => "💶"
+  }.freeze
+
+  def settlement_status_emoji(settlement)
+    state = settlement.aasm_state.to_s
+    label = state.humanize
+    content_tag(
+      :span,
+      SETTLEMENT_STATUS_EMOJI.fetch(state, state),
+      title: label,
+      "aria-label": label
+    )
+  end
+
   def formatted_price(price_in_cents)
     price = (price_in_cents / 100.to_f)
     number_to_currency(price, unit: "EUR", separator: ",", delimiter: "", format: "%n %u")

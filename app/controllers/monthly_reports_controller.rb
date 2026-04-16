@@ -1,5 +1,5 @@
 class MonthlyReportsController < ApplicationController
-  before_action :set_monthly_report, only: %i[ edit update complete_settlements ]
+  before_action :set_monthly_report, only: %i[ edit update complete_settlements schedule_settlement_emails ]
 
   def index
     @monthly_reports = MonthlyReport.order(id: :desc).all
@@ -37,6 +37,17 @@ class MonthlyReportsController < ApplicationController
     @monthly_report.complete_settlements!
 
     redirect_back fallback_location: edit_monthly_report_path(@monthly_report)
+  end
+
+  def schedule_settlement_emails
+    scheduled_count = @monthly_report.schedule_settlement_emails!
+
+    if scheduled_count.positive?
+      redirect_back fallback_location: settlements_path,
+                    notice: "#{helpers.pluralize(scheduled_count, 'email')} scheduled."
+    else
+      redirect_back fallback_location: settlements_path, alert: "No emails were scheduled."
+    end
   end
 
   private

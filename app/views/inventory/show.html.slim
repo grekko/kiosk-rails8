@@ -4,49 +4,51 @@ ruby:
 
 h1 Inventory
 
-table#drinks
-  thead
-    th Name
-    th Ordered
-    th Settled
-    th Status
-    th Purchase Price
-    th Selling Price
-  tbody
-    - @drink_inventory_rows.each do |row|
-      ruby:
-        total_purchase_price += row.purchase_price
-        total_selling_price += row.selling_price
+.table-wrap
+  table#drinks.table-sticky-first
+    thead
+      th Name
+      th Ordered
+      th Settled
+      th Status
+      th.amount Purchase Price
+      th.amount Selling Price
+    tbody
+      - @drink_inventory_rows.each do |row|
+        ruby:
+          total_purchase_price += row.purchase_price
+          total_selling_price += row.selling_price
+
+        tr
+          td= link_to row.name, edit_drink_path(row.id)
+          td= row.ordered_count
+          td= row.settled_count
+          td= row.remaining_count
+          td.amount= formatted_price(row.purchase_price)
+          td.amount= formatted_price(row.selling_price)
 
       tr
-        td= link_to row.name, edit_drink_path(row.id)
-        td= row.ordered_count
-        td= row.settled_count
-        td= row.remaining_count
-        td= formatted_price(row.purchase_price)
-        td= formatted_price(row.selling_price)
-
-    tr
-      td colspan=4
-      td: strong= formatted_price(total_purchase_price)
-      td: strong= formatted_price(total_selling_price)
+        td colspan=4
+        td.amount: strong= formatted_price(total_purchase_price)
+        td.amount: strong= formatted_price(total_selling_price)
 
 h2 Finance
 
-table#finance
-  thead
-    th Name
-    th Value
-  tbody
-    tr
-      td: strong Open
-      td: strong= formatted_price(@unsettled_in_cents)
-    tr
-      td: strong Settled
-      td= formatted_price(@settled_in_cents)
-    tr
-      td: strong Ordered
-      td= formatted_price(@ordered_in_cents)
-    tr
-      td: strong Status
-      td= formatted_price(@settled_in_cents - @ordered_in_cents)
+.table-wrap
+  table#finance.table-sticky-first
+    thead
+      th Name
+      th.amount Value
+    tbody
+      tr
+        td: strong Open
+        td.amount: strong= formatted_price(@unsettled_in_cents)
+      tr
+        td: strong Settled
+        td.amount= formatted_price(@settled_in_cents)
+      tr
+        td: strong Ordered
+        td.amount= formatted_price(@ordered_in_cents)
+      tr
+        td: strong Status
+        td.amount= formatted_price(@settled_in_cents - @ordered_in_cents)
