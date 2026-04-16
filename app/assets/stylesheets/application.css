@@ -21,17 +21,20 @@
   margin-bottom: 0;
 }
 
-/* Sticky first column for scrollable tables. */
-.table-sticky-first th:first-child,
-.table-sticky-first td:first-child {
+/* Sticky first column for scrollable tables.
+   Exclude spanning cells: applying sticky positioning to a first cell
+   with `colspan` can make the whole row stick and break horizontal
+   scrolling / overlay adjacent cells. */
+.table-sticky-first th:first-child:not([colspan]),
+.table-sticky-first td:first-child:not([colspan]) {
   position: sticky;
   left: 0;
   background: var(--pico-background-color);
   z-index: 1;
 }
-.table-sticky-first thead th:first-child,
-.table-sticky-first tfoot th:first-child,
-.table-sticky-first tfoot td:first-child {
+.table-sticky-first thead th:first-child:not([colspan]),
+.table-sticky-first tfoot th:first-child:not([colspan]),
+.table-sticky-first tfoot td:first-child:not([colspan]) {
   z-index: 2;
 }
 
@@ -42,11 +45,8 @@ th.amount {
   white-space: nowrap;
 }
 
-/* Settlement group header (grouped by monthly report).
-   Selector specificity must beat `.table-sticky-first td:first-child`
-   so the header background isn't overridden on the first cell. */
-.settlement-group-header td,
-.table-sticky-first .settlement-group-header td:first-child {
+/* Settlement group header (grouped by monthly report). */
+.settlement-group-header td {
   background: #ededed;
 }
 .settlement-group-header__row {

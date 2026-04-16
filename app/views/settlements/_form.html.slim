@@ -28,6 +28,7 @@
           td
           td
           td.amount: strong= formatted_price(settlement.price_in_cents)
+          td
 
 - if settlement.persisted? && settlement.draft?
   = button_to "Complete Settlement", complete_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }

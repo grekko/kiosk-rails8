@@ -13,6 +13,8 @@ class MonthlyReport < ApplicationRecord
   end
 
   def schedule_settlement_emails!
-    settlements.where.not(aasm_state: :draft).find_each(&:schedule_email_delivery)
+    settlements.where.not(aasm_state: :draft).find_each.count do |settlement|
+      settlement.schedule_email_delivery
+    end
   end
 end

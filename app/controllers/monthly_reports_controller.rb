@@ -40,9 +40,14 @@ class MonthlyReportsController < ApplicationController
   end
 
   def schedule_settlement_emails
-    @monthly_report.schedule_settlement_emails!
+    scheduled_count = @monthly_report.schedule_settlement_emails!
 
-    redirect_back fallback_location: settlements_path, notice: "Emails scheduled."
+    if scheduled_count.positive?
+      redirect_back fallback_location: settlements_path,
+                    notice: "#{helpers.pluralize(scheduled_count, 'email')} scheduled."
+    else
+      redirect_back fallback_location: settlements_path, alert: "No emails were scheduled."
+    end
   end
 
   private
