@@ -14,7 +14,8 @@ class ApplicationControllerAuthTest < ActionDispatch::IntegrationTest
     get root_path, headers: BASIC_AUTH_HEADER
     assert_response :success
 
-    signed_value = cookies.signed[ApplicationController::AUTH_COOKIE_NAME]
+    jar = ActionDispatch::Cookies::CookieJar.build(request, cookies.to_hash)
+    signed_value = jar.signed[ApplicationController::AUTH_COOKIE_NAME]
     assert_equal ApplicationController::AUTH_COOKIE_VALUE, signed_value
   end
 
