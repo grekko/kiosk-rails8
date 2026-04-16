@@ -8,25 +8,26 @@
 - if settlement.persisted?
   h2 Positions
 
-  table#positions
-    thead
-      th Drink
-      th Amount
-      th Price
-      th Actions
-    tbody
-      - settlement.positions.each do |position|
+  .table-wrap
+    table#positions.table-sticky-first
+      thead
+        th Drink
+        th Amount
+        th.amount Price
+        th Actions
+      tbody
+        - settlement.positions.each do |position|
+          tr
+            td= link_to position.drink.name, edit_settlement_position_path(position.settlement, position)
+            td= position.amount
+            td.amount= formatted_price(position.price_in_cents)
+            td
+              - if settlement.draft?
+                = button_to "Delete", settlement_position_path(position.settlement, position), method: :delete, data: { turbo_confirm: "Sure?" }
         tr
-          td= link_to position.drink.name, edit_settlement_position_path(position.settlement, position)
-          td= position.amount
-          td= formatted_price(position.price_in_cents)
           td
-            - if settlement.draft?
-              = button_to "Delete", settlement_position_path(position.settlement, position), method: :delete, data: { turbo_confirm: "Sure?" }
-      tr
-        td
-        td
-        td: strong= formatted_price(settlement.price_in_cents)
+          td
+          td.amount: strong= formatted_price(settlement.price_in_cents)
 
 - if settlement.persisted? && settlement.draft?
   = button_to "Complete Settlement", complete_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }

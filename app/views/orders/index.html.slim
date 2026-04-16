@@ -2,22 +2,23 @@ h1 Orders
 
 = link_to "New Order", new_order_path
 
-table#orders
-  thead
-    th Date
-    th Price
-    th Deposit
-    th Total
-  tbody
-    - @orders.each do |order|
-      tr
-        td= link_to l(order.ordered_at), edit_order_path(order)
-        td= formatted_price(order.price_in_cents)
-        td= formatted_price(order.deposit_in_cents)
-        td= formatted_price(order.total_price_in_cents)
+.table-wrap
+  table#orders.table-sticky-first
+    thead
+      th Date
+      th.amount Price
+      th.amount Deposit
+      th.amount Total
+    tbody
+      - @orders.each do |order|
+        tr
+          td= link_to l(order.ordered_at), edit_order_path(order)
+          td.amount= formatted_price(order.price_in_cents)
+          td.amount= formatted_price(order.deposit_in_cents)
+          td.amount= formatted_price(order.total_price_in_cents)
 
-    tr
-      td
-      td: strong= formatted_price(@orders.sum(&:price_in_cents))
-      td: strong= formatted_price(@orders.sum(&:deposit_in_cents))
-      td: strong= formatted_price(@orders.sum(&:total_price_in_cents))
+      tr
+        td
+        td.amount: strong= formatted_price(@orders.sum(&:price_in_cents))
+        td.amount: strong= formatted_price(@orders.sum(&:deposit_in_cents))
+        td.amount: strong= formatted_price(@orders.sum(&:total_price_in_cents))

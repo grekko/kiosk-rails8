@@ -11,4 +11,8 @@ class MonthlyReport < ApplicationRecord
       settlement.complete!
     end
   end
+
+  def schedule_settlement_emails!
+    settlements.find_each(&:schedule_email_delivery)
+  end
 end
