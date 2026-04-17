@@ -19,6 +19,7 @@ gem "redcarpet" # Markdown processor (solely used to generate plaintext versions
 gem "aasm"
 gem "image_processing", ">= 1.2"
 gem "postmark-rails"
+gem "rqrcode"
 gem "sentry-rails"
 gem "sentry-ruby"
 gem "tzinfo-data", platforms: %i[ windows jruby ]

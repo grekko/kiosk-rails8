@@ -37,7 +37,16 @@ p
       .roundup__row
         strong IBAN
         '&nbsp;
-        span DE91500105175411307099
+        span= Rails.configuration.kiosk_iban
+      .roundup__qr
+        .roundup__qr-variant.roundup__qr-variant--active data-variant="exact"
+          == epc_qr_svg(outstanding_in_cents, epc_remittance(@client.name, outstanding_in_cents, outstanding_in_cents))
+        .roundup__qr-variant data-variant="rounded"
+          == epc_qr_svg(rounded_up_in_cents, epc_remittance(@client.name, outstanding_in_cents, rounded_up_in_cents))
+        .roundup__qr-variant data-variant="exactGenerous"
+          == epc_qr_svg(exact_generous_in_cents, epc_remittance(@client.name, outstanding_in_cents, exact_generous_in_cents))
+        .roundup__qr-variant data-variant="roundedGenerous"
+          == epc_qr_svg(rounded_generous_in_cents, epc_remittance(@client.name, outstanding_in_cents, rounded_generous_in_cents))
       p.roundup__hint Du kannst die Rechnung gerne exakt begleichen oder aufrunden.
       label.roundup__toggle
         input.roundup__checkbox type="checkbox"
@@ -56,6 +65,8 @@ p
       const link = root.querySelector('.roundup__link');
       const amount = root.querySelector('.roundup__amount');
 
+      const qrVariants = root.querySelectorAll('.roundup__qr-variant');
+
       const apply = () => {
         const rounded = roundupBox.checked;
         if (!rounded) generousBox.checked = false;
@@ -65,6 +76,9 @@ p
         link.href = root.dataset[`${key}Url`];
         root.classList.toggle('roundup--on', rounded);
         root.classList.toggle('roundup--generous', generous);
+        qrVariants.forEach((el) => {
+          el.classList.toggle('roundup__qr-variant--active', el.dataset.variant === key);
+        });
         amount.classList.remove('roundup__amount--pop');
         void amount.offsetWidth;
         amount.classList.add('roundup__amount--pop');

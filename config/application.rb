@@ -27,5 +27,8 @@ module Kiosk
     config.active_record.schema_format = :sql
 
     config.action_mailer.postmark_settings = { api_token: ENV["POSTMARK_API_TOKEN"] }
+
+    config.kiosk_iban = "DE91500105175411307099"
+    config.kiosk_beneficiary_name = "Gregory Igelmund"
   end
 end

@@ -44,12 +44,47 @@ module ApplicationHelper
       Du kannst die Rechnung gerne per PayPal oder SEPA begleichen:
       #{paypal_payment_url(payment.amount_in_cents)}
 
-      DE91500105175411307099
+      #{Rails.configuration.kiosk_iban}
     MESSAGE
   end
 
   def paypal_payment_url(amount_in_cents)
     "https://paypal.me/gregoryigelmund/#{(amount_in_cents / 100.to_f).round(2)}"
+  end
+
+  def epc_remittance(client_name, base_in_cents, total_in_cents)
+    tip = total_in_cents - base_in_cents
+    text = "Deckel #{client_name}"
+    text += " + #{formatted_price(tip)} Trinkgeld" if tip.positive?
+    text
+  end
+
+  def epc_qr_payload(amount_in_cents, remittance)
+    amount = format("EUR%.2f", amount_in_cents / 100.0)
+    [
+      "BCD",
+      "002",
+      "1",
+      "SCT",
+      "",
+      Rails.configuration.kiosk_beneficiary_name,
+      Rails.configuration.kiosk_iban,
+      amount,
+      "",
+      "",
+      remittance.to_s[0, 140]
+    ].join("\n")
+  end
+
+  def epc_qr_svg(amount_in_cents, remittance)
+    payload = epc_qr_payload(amount_in_cents, remittance)
+    RQRCode::QRCode.new(payload, level: :m).as_svg(
+      module_size: 4,
+      standalone: true,
+      use_path: true,
+      viewbox: true,
+      svg_attributes: { class: "epc-qr" }
+    ).html_safe
   end
 
   def rounded_up_full_euro_in_cents(amount_in_cents)

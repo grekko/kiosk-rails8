@@ -178,6 +178,27 @@ header nav ol {
   opacity: 0.8;
 }
 
+.roundup__qr {
+  position: relative;
+  width: 180px;
+  height: 180px;
+}
+
+.roundup__qr-variant {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.roundup__qr-variant--active {
+  display: block;
+}
+
+.roundup__qr-variant svg {
+  width: 100%;
+  height: 100%;
+}
+
 .roundup__sparkle {
   position: absolute;
   top: 4px;
