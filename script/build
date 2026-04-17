@@ -2,7 +2,7 @@
 
 set -e
 
-REGISTRY="diskstation:5005"
+REGISTRY="diskstation.tail9a6aa.ts.net:5005"
 IMAGE="kiosk"
 SHA="$(git rev-parse --short HEAD)"
 
