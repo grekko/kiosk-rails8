@@ -3,7 +3,8 @@
 set -e
 
 STACK_REPO="$(cd "$(dirname "$0")/../../grekko.dsm" && pwd)"
-STACK_ENV="$STACK_REPO/portainer-stacks/kiosk/stack.env"
+STACK_ENV_PATH="portainer-stacks/kiosk/.env"
+STACK_ENV="$STACK_REPO/$STACK_ENV_PATH"
 SHA="$(git rev-parse --short HEAD)"
 
 if ! git diff --quiet HEAD; then
@@ -22,7 +23,7 @@ if ! grep -q '^KIOSK_TAG=' "$STACK_ENV"; then
 fi
 
 if grep -q "^KIOSK_TAG=$SHA\$" "$STACK_ENV"; then
-  echo "stack.env already pinned to $SHA — nothing to deploy." >&2
+  echo "$STACK_ENV_PATH already pinned to $SHA — nothing to deploy." >&2
   exit 0
 fi
 
@@ -30,7 +31,7 @@ fi
 
 sed -i '' -E "s|^KIOSK_TAG=.*|KIOSK_TAG=$SHA|" "$STACK_ENV"
 
-git -C "$STACK_REPO" commit -m "Deploy kiosk $SHA" -- portainer-stacks/kiosk/stack.env
+git -C "$STACK_REPO" commit -m "Deploy kiosk $SHA" -- "$STACK_ENV_PATH"
 git -C "$STACK_REPO" push
 
 echo
