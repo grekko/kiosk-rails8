@@ -40,7 +40,7 @@ FOREIGN KEY ("blob_id")
   REFERENCES "active_storage_blobs" ("id")
 );
 CREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest") /*application='Kiosk'*/;
-CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, "email_sent_at" datetime(6), CONSTRAINT "fk_rails_4a7bf0e43f"
+CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, "email_sent_at" datetime(6), "email_first_opened_at" datetime(6) /*application='Kiosk'*/, CONSTRAINT "fk_rails_4a7bf0e43f"
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 , CONSTRAINT "fk_rails_5c7519b292"
@@ -59,8 +59,9 @@ CREATE TABLE IF NOT EXISTS "payments" ("id" integer PRIMARY KEY AUTOINCREMENT NO
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 );
-CREATE INDEX "index_payments_on_client_id" ON "payments" ("client_id") /*application='Kiosk'*/;
+CREATE INDEX "index_payments_on_client_id" ON "payments" ("client_id");
 INSERT INTO "schema_migrations" (version) VALUES
+('20260517000000'),
 ('20260108174900'),
 ('20251224082432'),
 ('20251224081714'),

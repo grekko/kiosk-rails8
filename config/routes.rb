@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     resources :client, param: :access_uuid, only: %i[show] do
       resources :monthly_reports, only: %i[show]
     end
+    resources :settlement_tracking, only: %i[show]
   end
 
   resources :payments, only: %i[index]
