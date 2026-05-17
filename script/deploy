@@ -16,6 +16,16 @@ if [ ! -f "$STACK_ENV" ]; then
   exit 1
 fi
 
+if ! grep -q '^KIOSK_TAG=' "$STACK_ENV"; then
+  echo "No KIOSK_TAG line in $STACK_ENV — seed it first." >&2
+  exit 1
+fi
+
+if grep -q "^KIOSK_TAG=$SHA\$" "$STACK_ENV"; then
+  echo "stack.env already pinned to $SHA — nothing to deploy." >&2
+  exit 0
+fi
+
 "$(dirname "$0")/build"
 
 sed -i '' -E "s|^KIOSK_TAG=.*|KIOSK_TAG=$SHA|" "$STACK_ENV"
