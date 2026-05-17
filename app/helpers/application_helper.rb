@@ -27,6 +27,12 @@ module ApplicationHelper
     date.to_date.iso8601
   end
 
+  def formatted_datetime(datetime)
+    return unless datetime
+
+    datetime.in_time_zone("Europe/Berlin").strftime("%Y-%m-%d %H:%M")
+  end
+
   def payment_message(payment)
     <<~MESSAGE
       Hallo #{payment.client.name},
