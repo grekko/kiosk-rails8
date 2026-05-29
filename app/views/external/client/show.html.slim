@@ -40,13 +40,13 @@ p
         span= Rails.configuration.kiosk_iban
       .roundup__qr
         .roundup__qr-variant.roundup__qr-variant--active data-variant="exact"
-          == epc_qr_svg(outstanding_in_cents, epc_remittance(@client.name, outstanding_in_cents, outstanding_in_cents))
+          = epc_qr_image(outstanding_in_cents, epc_remittance(@client.name, outstanding_in_cents, outstanding_in_cents))
         .roundup__qr-variant data-variant="rounded"
-          == epc_qr_svg(rounded_up_in_cents, epc_remittance(@client.name, outstanding_in_cents, rounded_up_in_cents))
+          = epc_qr_image(rounded_up_in_cents, epc_remittance(@client.name, outstanding_in_cents, rounded_up_in_cents))
         .roundup__qr-variant data-variant="exactGenerous"
-          == epc_qr_svg(exact_generous_in_cents, epc_remittance(@client.name, outstanding_in_cents, exact_generous_in_cents))
+          = epc_qr_image(exact_generous_in_cents, epc_remittance(@client.name, outstanding_in_cents, exact_generous_in_cents))
         .roundup__qr-variant data-variant="roundedGenerous"
-          == epc_qr_svg(rounded_generous_in_cents, epc_remittance(@client.name, outstanding_in_cents, rounded_generous_in_cents))
+          = epc_qr_image(rounded_generous_in_cents, epc_remittance(@client.name, outstanding_in_cents, rounded_generous_in_cents))
       p.roundup__hint Du kannst die Rechnung gerne exakt begleichen oder aufrunden.
       label.roundup__toggle
         input.roundup__checkbox type="checkbox"

@@ -82,15 +82,15 @@ module ApplicationHelper
     ].join("\n")
   end
 
-  def epc_qr_svg(amount_in_cents, remittance)
+  def epc_qr_image(amount_in_cents, remittance)
     payload = epc_qr_payload(amount_in_cents, remittance)
-    RQRCode::QRCode.new(payload, level: :m).as_svg(
-      module_size: 4,
-      standalone: true,
-      use_path: true,
-      viewbox: true,
-      svg_attributes: { class: "epc-qr" }
-    ).html_safe
+    png = RQRCode::QRCode.new(payload, level: :m).as_png(
+      border_modules: 4,     # quiet zone — required for scanners
+      module_px_size: 8,     # crisp resolution
+      color: "black",
+      fill: "white"          # opaque white bg keeps contrast in dark mode
+    )
+    image_tag(png.to_data_url, alt: "EPC-QR-Code", class: "epc-qr")
   end
 
   def rounded_up_full_euro_in_cents(amount_in_cents)
