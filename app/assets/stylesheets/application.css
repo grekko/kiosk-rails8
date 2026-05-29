@@ -194,7 +194,8 @@ header nav ol {
   display: block;
 }
 
-.roundup__qr-variant svg {
+.roundup__qr-variant img,
+.roundup__qr-variant .epc-qr {
   width: 100%;
   height: 100%;
 }
