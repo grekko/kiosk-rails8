@@ -1,0 +1,141 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "611712bd2156eecb97ee75c81e2ec3de3832e6b70875c83de2fc3cc9109f9852",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/external/client/show.html.slim",
+      "line": 47,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "epc_qr_svg((Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents + 100), epc_remittance(Client.find_by!(:access_uuid => params[:access_uuid]).name, Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents, (Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents + 100)))",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "External::ClientController",
+          "method": "show",
+          "line": 4,
+          "file": "app/controllers/external/client_controller.rb",
+          "rendered": {
+            "name": "external/client/show",
+            "file": "app/views/external/client/show.html.slim"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "external/client/show"
+      },
+      "user_input": "Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "78a96a3fa5fd86d813f52c550b9470ada63b3aa6485936f3a833af45f5eb0775",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/external/client/show.html.slim",
+      "line": 45,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "epc_qr_svg(rounded_up_full_euro_in_cents(Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents), epc_remittance(Client.find_by!(:access_uuid => params[:access_uuid]).name, Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents, rounded_up_full_euro_in_cents(Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents)))",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "External::ClientController",
+          "method": "show",
+          "line": 4,
+          "file": "app/controllers/external/client_controller.rb",
+          "rendered": {
+            "name": "external/client/show",
+            "file": "app/views/external/client/show.html.slim"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "external/client/show"
+      },
+      "user_input": "Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "871845249d1c338d0a8cd1a197e4d5e7dbbd9f85ff7ac70af5cdb532e76936bc",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/external/client/show.html.slim",
+      "line": 43,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "epc_qr_svg(Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents, epc_remittance(Client.find_by!(:access_uuid => params[:access_uuid]).name, Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents, Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents))",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "External::ClientController",
+          "method": "show",
+          "line": 4,
+          "file": "app/controllers/external/client_controller.rb",
+          "rendered": {
+            "name": "external/client/show",
+            "file": "app/views/external/client/show.html.slim"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "external/client/show"
+      },
+      "user_input": "Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "f3f70e7b52026ff499184d469d4bb5361800b697f46e3f23f238e44711f3bcc2",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/external/client/show.html.slim",
+      "line": 49,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "epc_qr_svg((rounded_up_full_euro_in_cents(Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents) + 100), epc_remittance(Client.find_by!(:access_uuid => params[:access_uuid]).name, Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents, (rounded_up_full_euro_in_cents(Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents) + 100)))",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "External::ClientController",
+          "method": "show",
+          "line": 4,
+          "file": "app/controllers/external/client_controller.rb",
+          "rendered": {
+            "name": "external/client/show",
+            "file": "app/views/external/client/show.html.slim"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "external/client/show"
+      },
+      "user_input": "Client.find_by!(:access_uuid => params[:access_uuid]).outstanding_payment_sum_in_cents",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    }
+  ],
+  "brakeman_version": "8.0.4"
+}
