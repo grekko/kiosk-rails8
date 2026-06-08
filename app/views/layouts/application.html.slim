@@ -39,4 +39,7 @@ html
             li= link_to "Settlements", settlements_path
             li= link_to "Prices", settlement_prices_path
 
-    main= yield
+    main
+      - flash.each do |type, message|
+        p.flash role="alert" class="flash--#{type}"= message
+      = yield

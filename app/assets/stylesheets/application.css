@@ -9,6 +9,25 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
+.flash {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid;
+  border-radius: var(--pico-border-radius);
+}
+
+.flash--alert {
+  color: var(--pico-color-red-600, #b91c1c);
+  border-color: var(--pico-color-red-500, #ef4444);
+  background: var(--pico-color-red-50, #fef2f2);
+}
+
+.flash--notice {
+  color: var(--pico-color-green-700, #15803d);
+  border-color: var(--pico-color-green-500, #22c55e);
+  background: var(--pico-color-green-50, #f0fdf4);
+}
+
 .table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

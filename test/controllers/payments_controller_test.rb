@@ -35,8 +35,9 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
 
     post client_payments_path(client), params: { payment: { amount_in_cents: 500 } }, headers: AUTH
 
-    assert_redirected_to new_client_payment_path(client)
+    assert_response :unprocessable_entity
     assert_equal 0, client.payments.count
+    assert_select "p.flash.flash--alert", text: /Payment too low/
   end
 
   private

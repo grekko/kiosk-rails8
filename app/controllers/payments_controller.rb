@@ -9,14 +9,16 @@ class PaymentsController < ApplicationController
   end
 
   def create
-    client = Client.find(params.expect(:client_id))
+    @client = Client.find(params.expect(:client_id))
     amount = params.expect(payment: [ :amount_in_cents ])[:amount_in_cents].presence
-    @payment = Payment.create_for_client(client, amount&.to_i)
+    @payment = Payment.create_for_client(@client, amount&.to_i)
 
     if @payment
       redirect_to clients_path, notice: "Payment recorded."
     else
-      redirect_to new_client_payment_path(client), alert: "Amount too low to cover any settlement."
+      @payment = @client.payments.new(amount_in_cents: amount)
+      flash.now[:alert] = "Payment too low — it must cover at least one full outstanding settlement."
+      render :new, status: :unprocessable_entity
     end
   end
 end
