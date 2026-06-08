@@ -6,7 +6,7 @@ Rails.application.routes.draw do
       patch :suspend
       patch :reinstate
     end
-    resources :payments, only: %i[create]
+    resources :payments, only: %i[new create]
   end
 
   namespace :external do

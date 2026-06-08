@@ -6,6 +6,15 @@ Tracks Drinks, Orders, Clients and Monthly Reports, Settlements and Payments.
 
 Secrets are managed via ENV variables. See .envrc.
 
+## Run locally
+
+```bash
+bin/setup   # first time: install deps, prepare DB
+bin/dev     # start the server (Puma) at http://localhost:3050
+```
+
+`bin/dev` loads `.env` and execs `bin/rails server`. Set the port via `PORT` in `.env` (defaults to `3050`).
+
 
 ## How to Deploy
 

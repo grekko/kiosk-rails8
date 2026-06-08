@@ -20,11 +20,11 @@ class Settlement < ApplicationRecord
     state :completed
     state :paid
 
-    event :complete, after: %(set_completed_at) do
+    event :complete, before: :set_completed_at do
       transitions from: :draft, to: :completed
     end
 
-    event :mark_paid, after: :set_paid_at do
+    event :mark_paid, before: :set_paid_at do
       transitions from: :completed, to: :paid
     end
   end
