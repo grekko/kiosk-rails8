@@ -126,6 +126,13 @@ header nav ol {
   gap: 15px;
 }
 
+/* PDF scans of a monthly report; <embed> defaults to a useless 300x150. */
+.report-attachment-pdf {
+  width: 100%;
+  min-width: 300px;
+  height: 80vh;
+}
+
 .report-clients {
   margin-top: 300px;
 }

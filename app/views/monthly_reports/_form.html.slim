@@ -3,7 +3,7 @@
     = form.input :title, as: :string
     = form.input :description, as: :text
     - if form.object.image.attached?
-      = image_tag form.object.image.url
+      = report_attachment_tag form.object.image
     = form.input :image
     = form.button :submit
 

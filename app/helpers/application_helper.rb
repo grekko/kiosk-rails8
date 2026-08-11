@@ -24,6 +24,15 @@ module ApplicationHelper
     )
   end
 
+  # A monthly report's attachment is usually a photo, but scans get uploaded as
+  # PDFs — those render as a broken image in an <img>, so they get an <embed>
+  # instead (same as the order invoice preview).
+  def report_attachment_tag(attachment)
+    return image_tag(attachment.url) unless attachment.content_type == "application/pdf"
+
+    tag.embed(src: attachment.url, type: attachment.content_type, class: "report-attachment-pdf")
+  end
+
   def formatted_price(price_in_cents)
     price = (price_in_cents / 100.to_f)
     number_to_currency(price, unit: "EUR", separator: ",", delimiter: "", format: "%n %u")
