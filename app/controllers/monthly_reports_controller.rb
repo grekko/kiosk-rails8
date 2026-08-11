@@ -1,8 +1,10 @@
 class MonthlyReportsController < ApplicationController
-  before_action :set_monthly_report, only: %i[ edit update complete_settlements schedule_settlement_emails ]
+  before_action :set_monthly_report, only: %i[ edit update complete reopen complete_settlements schedule_settlement_emails ]
 
   def index
-    @monthly_reports = MonthlyReport.order(id: :desc).all
+    @state = params[:state].presence
+    @monthly_reports = MonthlyReport.order(id: :desc)
+    @monthly_reports = @monthly_reports.by_state(@state) if @state
   end
 
   def new
@@ -31,6 +33,18 @@ class MonthlyReportsController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def complete
+    @monthly_report.complete!
+
+    redirect_back fallback_location: monthly_reports_path, notice: "Report marked as completed."
+  end
+
+  def reopen
+    @monthly_report.reopen!
+
+    redirect_back fallback_location: monthly_reports_path, notice: "Report moved back to draft."
   end
 
   def complete_settlements

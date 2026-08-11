@@ -21,4 +21,7 @@
 
       h3 Overall Amount (#{monthly_report.overall_amount})
 
-      = button_to "Mark as completed", complete_settlements_monthly_report_path(monthly_report), method: :patch, data: { turbo_confirm: "Sure?" }
+      = button_to "Complete all settlements", complete_settlements_monthly_report_path(monthly_report), method: :patch, data: { turbo_confirm: "Sure?" }
+
+      h3 Report state (#{monthly_report.state.humanize})
+      = render "completion_button", monthly_report: monthly_report

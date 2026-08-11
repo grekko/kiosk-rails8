@@ -2,11 +2,24 @@ h1 Monthly Reports
 
 = link_to "New Report", new_monthly_report_path
 
+nav.report-filters
+  - { "All" => nil, "Drafts" => "draft", "Completed" => "completed" }.each do |label, state|
+    - if @state == state
+      strong= label
+    - else
+      = link_to label, monthly_reports_path(state: state)
+
 .table-wrap
   table#monthly_reports.table-sticky-first
     thead
       th Title
+      th State
+      th Completed At
+      th Actions
     tbody
       - @monthly_reports.each do |report|
         tr
           td= link_to report.title, edit_monthly_report_path(report)
+          td= monthly_report_status_emoji(report)
+          td= formatted_date(report.completed_at)
+          td= render "completion_button", monthly_report: report

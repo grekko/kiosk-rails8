@@ -14,9 +14,13 @@ USAGE = <<~TEXT
   Reading
     clients [--active]
     drinks
-    monthly-reports
+    monthly-reports [--state draft|completed]
     settlements [--client-id N] [--monthly-report-id N] [--state draft|completed|paid]
     settlement ID
+
+  Monthly report workflow
+    complete-report ID
+    reopen-report ID
 
   Settlement workflow
     create-settlement --client-id N --monthly-report-id N --generated-at YYYY-MM-DD [--positions 7:3,9:1]
@@ -75,7 +79,11 @@ def run(command, client)
   when "drinks"
     client.drinks
   when "monthly-reports"
-    client.monthly_reports
+    client.monthly_reports(**parse_options(ARGV).slice(:state))
+  when "complete-report"
+    client.complete_monthly_report(require_id(ARGV))
+  when "reopen-report"
+    client.reopen_monthly_report(require_id(ARGV))
   when "settlements"
     client.settlements(**parse_options(ARGV).slice(:client_id, :monthly_report_id, :state))
   when "settlement"

@@ -19,7 +19,12 @@ Rails.application.routes.draw do
   namespace :api do
     resources :clients, only: %i[index]
     resources :drinks, only: %i[index]
-    resources :monthly_reports, only: %i[index]
+    resources :monthly_reports, only: %i[index] do
+      member do
+        post :complete
+        post :reopen
+      end
+    end
 
     resources :settlements, only: %i[index show create update] do
       member do
@@ -39,6 +44,8 @@ Rails.application.routes.draw do
 
   resources :monthly_reports, except: %i[show destroy] do
     member do
+      patch :complete
+      patch :reopen
       patch :complete_settlements
       patch :schedule_settlement_emails
     end

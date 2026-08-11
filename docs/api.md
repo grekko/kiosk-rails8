@@ -143,15 +143,56 @@ backdated settlement may use a different price.
 
 Lists monthly reports, newest first. Every settlement belongs to one.
 
+Query parameter: `state` (`draft` | `completed`). Without it, drafts and
+completed reports are listed together; an unknown state returns an empty list.
+
 ```json
 {
   "monthly_reports": [
-    { "id": 4, "title": "Januar 2026", "description": "…", "created_at": "2026-02-01T09:00:00Z" }
+    {
+      "id": 4,
+      "title": "Januar 2026",
+      "description": "…",
+      "state": "completed",
+      "completed_at": "2026-02-05T18:30:00Z",
+      "created_at": "2026-02-01T09:00:00Z"
+    }
   ]
 }
 ```
 
-Monthly reports are created in the web UI; the API is read-only here.
+```bash
+curl -H "Authorization: Bearer $KIOSK_API_TOKEN" \
+     "https://kiosk.example.com/api/monthly_reports?state=draft"
+```
+
+Monthly reports are created and edited in the web UI; the API only lists them
+and flips the completion marker.
+
+### `POST /api/monthly_reports/:id/complete`
+
+### `POST /api/monthly_reports/:id/reopen`
+
+Marks a report as completed — done by hand once every settlement of that month
+exists — or moves it back to `draft`. Nothing switches automatically, and both
+directions are always allowed, so completing twice or reopening a draft is a
+no-op rather than an error. The state is a filter marker only: it neither hides
+the report nor locks its settlements.
+
+Both return the updated report:
+
+```json
+{
+  "monthly_report": {
+    "id": 4,
+    "title": "Januar 2026",
+    "description": "…",
+    "state": "completed",
+    "completed_at": "2026-02-05T18:30:00Z",
+    "created_at": "2026-02-01T09:00:00Z"
+  }
+}
+```
 
 ### `GET /api/settlements`
 
@@ -357,6 +398,9 @@ curl -s -X POST -H "$AUTH" "$KIOSK_API/settlements/$SETTLEMENT_ID/complete"
 
 # 5. Mail it to the client
 curl -s -X POST -H "$AUTH" "$KIOSK_API/settlements/$SETTLEMENT_ID/send_email"
+
+# 6. Once every settlement of that month exists, mark the report as completed
+curl -s -X POST -H "$AUTH" "$KIOSK_API/monthly_reports/4/complete"
 ```
 
 Payments are deliberately not part of this API — settle and mail here, book
@@ -374,7 +418,9 @@ client = KioskApi::Client.new                      # or: .new(url:, token:)
 
 client.clients(active: true)                       # => [ { "id" => 1, … }, … ]
 client.drinks
-client.monthly_reports
+client.monthly_reports(state: "draft")
+client.complete_monthly_report(4)
+client.reopen_monthly_report(4)
 client.settlements(client_id: 1, state: "draft")
 client.settlement(42)
 
@@ -402,9 +448,12 @@ works straight from a checkout:
 ```bash
 script/api clients --active
 script/api drinks
-script/api monthly-reports
+script/api monthly-reports --state draft
 script/api settlements --client-id 1 --state draft
 script/api settlement 42
+
+script/api complete-report 4
+script/api reopen-report 4
 
 script/api create-settlement --client-id 1 --monthly-report-id 4 \
                              --generated-at 2026-01-31 --positions 7:3,9:1

@@ -1,0 +1,4 @@
+- if monthly_report.completed?
+  = button_to "Back to draft", reopen_monthly_report_path(monthly_report), method: :patch, class: "secondary"
+- else
+  = button_to "Mark report as completed", complete_monthly_report_path(monthly_report), method: :patch, data: { turbo_confirm: "All settlements created?" }
