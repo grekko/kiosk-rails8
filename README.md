@@ -15,6 +15,12 @@ bin/dev     # start the server (Puma) at http://localhost:3050
 
 `bin/dev` loads `.env` and execs `bin/rails server`. Set the port via `PORT` in `.env` (defaults to `3050`).
 
+## JSON API
+
+Clients and the settlement workflow (create, update, complete, mail) are also available as an internal JSON API under `/api`, authenticated with a bearer token from the Rails credentials (`api.token`).
+
+See [docs/api.md](docs/api.md).
+
 
 ## How to Deploy
 
