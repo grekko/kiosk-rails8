@@ -19,6 +19,19 @@ class Api::MonthlyReportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @completed.completed_at.iso8601, reports.fetch(@completed.id)["completed_at"]
   end
 
+  test "index exposes the attached image, nil when there is none" do
+    @draft.image.attach(io: StringIO.new("png-bytes"), filename: "january.png", content_type: "image/png")
+
+    with_api_token { get api_monthly_reports_path, headers: api_headers }
+
+    assert_response :success
+    reports = response.parsed_body["monthly_reports"].index_by { |entry| entry["id"] }
+    assert_equal "january.png", reports.fetch(@draft.id)["image_filename"]
+    assert_match %r{\Ahttps?://}, reports.fetch(@draft.id)["image_url"]
+    assert_nil reports.fetch(@completed.id)["image_url"]
+    assert_nil reports.fetch(@completed.id)["image_filename"]
+  end
+
   test "index filters by state" do
     with_api_token { get api_monthly_reports_path(state: "draft"), headers: api_headers }
 

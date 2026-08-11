@@ -15,6 +15,7 @@ USAGE = <<~TEXT
     clients [--active]
     drinks
     monthly-reports [--state draft|completed]
+    report-image ID [--output PATH]
     settlements [--client-id N] [--monthly-report-id N] [--state draft|completed|paid]
     settlement ID
 
@@ -80,6 +81,16 @@ def run(command, client)
     client.drinks
   when "monthly-reports"
     client.monthly_reports(**parse_options(ARGV).slice(:state))
+  when "report-image"
+    id = require_id(ARGV)
+    filename, bytes = client.monthly_report_image(id)
+    die("Monthly report #{id} has no image attached") if bytes.nil?
+
+    path = parse_options(ARGV)[:output]
+    path = filename if path.nil? || path == true
+    File.binwrite(path, bytes)
+
+    { id: Integer(id), file: path, bytes: bytes.bytesize }
   when "complete-report"
     client.complete_monthly_report(require_id(ARGV))
   when "reopen-report"

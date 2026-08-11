@@ -155,6 +155,9 @@ completed reports are listed together; an unknown state returns an empty list.
       "description": "…",
       "state": "completed",
       "completed_at": "2026-02-05T18:30:00Z",
+      "image_url": "https://kiosk.example.com/rails/active_storage/…/inventur.jpg",
+      "image_filename": "inventur.jpg",
+      "image_content_type": "image/jpeg",
       "created_at": "2026-02-01T09:00:00Z"
     }
   ]
@@ -166,8 +169,15 @@ curl -H "Authorization: Bearer $KIOSK_API_TOKEN" \
      "https://kiosk.example.com/api/monthly_reports?state=draft"
 ```
 
-Monthly reports are created and edited in the web UI; the API only lists them
-and flips the completion marker.
+A report can have one file attached (the inventory sheet). Despite the field
+names it is not always an image — scans are uploaded as PDFs, so check
+`image_content_type` before rendering. All three fields are `null` when there
+is no attachment. The URL is a short-lived,
+already-signed storage link: fetch it **without** the API token, and fetch it
+soon — it expires within minutes, so re-read the report instead of storing it.
+
+Monthly reports are created and edited in the web UI; the API only lists them,
+exposes the image and flips the completion marker.
 
 ### `POST /api/monthly_reports/:id/complete`
 
@@ -189,6 +199,9 @@ Both return the updated report:
     "description": "…",
     "state": "completed",
     "completed_at": "2026-02-05T18:30:00Z",
+    "image_url": null,
+    "image_filename": null,
+    "image_content_type": null,
     "created_at": "2026-02-01T09:00:00Z"
   }
 }
@@ -421,6 +434,7 @@ client.drinks
 client.monthly_reports(state: "draft")
 client.complete_monthly_report(4)
 client.reopen_monthly_report(4)
+client.monthly_report_image(4)                     # => [ "inventur.jpg", "\xFF\xD8…" ] or nil
 client.settlements(client_id: 1, state: "draft")
 client.settlement(42)
 
@@ -454,6 +468,7 @@ script/api settlement 42
 
 script/api complete-report 4
 script/api reopen-report 4
+script/api report-image 4 --output inventur.jpg   # writes the file, prints a summary
 
 script/api create-settlement --client-id 1 --monthly-report-id 4 \
                              --generated-at 2026-01-31 --positions 7:3,9:1

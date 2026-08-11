@@ -1,5 +1,7 @@
 class Api::BaseController < ActionController::API
   include ActionController::HttpAuthentication::Token::ControllerMethods
+  # ActionController::API skips this, so attachment URLs would have no host.
+  include ActiveStorage::SetCurrent
 
   # Payloads are documented explicitly in docs/api.md — no implicit wrapping,
   # which would silently drop nested keys such as `positions`.

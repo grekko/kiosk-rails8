@@ -38,6 +38,16 @@ module KioskApi
       get("monthly_reports", state: state).fetch("monthly_reports")
     end
 
+    # The report's attached image as [ filename, raw bytes ]. There is no show
+    # endpoint, so the report is picked out of the index. Nil when nothing is attached.
+    def monthly_report_image(id)
+      report = monthly_reports.find { |entry| entry["id"].to_s == id.to_s }
+      raise Error, "No monthly report with id #{id}" if report.nil?
+
+      url = report["image_url"]
+      url && [ report["image_filename"], download(url) ]
+    end
+
     def complete_monthly_report(id)
       post("monthly_reports/#{id}/complete").fetch("monthly_report")
     end
@@ -110,6 +120,23 @@ module KioskApi
 
     def delete(path)
       request(Net::HTTP::Delete, path)
+    end
+
+    # Attachment URLs are signed and live outside /api, so they carry no token
+    # and may redirect once from the blob route to the storage service.
+    def download(url, redirects_left = 3)
+      uri = URI.parse(url)
+      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") do |http|
+        http.request(Net::HTTP::Get.new(uri))
+      end
+
+      if response.is_a?(Net::HTTPRedirection) && redirects_left.positive?
+        return download(URI.join(uri, response["location"]).to_s, redirects_left - 1)
+      end
+
+      raise RequestError.new(response.code.to_i, response.body) unless response.is_a?(Net::HTTPSuccess)
+
+      response.body
     end
 
     def request(type, path, query: {}, body: nil)
