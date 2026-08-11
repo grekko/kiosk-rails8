@@ -17,19 +17,24 @@ Authorization: Bearer <token>
 
 The `Token` scheme (`Authorization: Token token="<token>"`) works as well.
 
-The token is stored in the Rails credentials under `api.token`:
+### Server side
+
+The token lives in the Rails credentials under `api.token`, with `ENV["API_TOKEN"]`
+as a fallback (credentials win when both are set):
 
 ```yaml
 api:
   token: 4f1b…   # generate with `bin/rails secret`
 ```
 
-Add it once per environment:
-
 ```bash
 bin/rails credentials:edit                          # development
 bin/rails credentials:edit --environment production # production
 ```
+
+Note that production reads `config/credentials/production.yml.enc`, not the
+default credentials file — so a production deploy needs the token either in the
+production credentials or as `API_TOKEN` in the container environment.
 
 Without a configured token the API answers `503 Service Unavailable` with
 `{"error": "api_not_configured"}` — every endpoint, so a missing credential can
@@ -39,6 +44,16 @@ Wrong or missing token ⇒ `401 Unauthorized`.
 
 The token grants full access to all endpoints below; there is no per-client
 scoping. Treat it like the admin password.
+
+### Client side
+
+Callers read the token from `ENV["API_TOKEN"]`. Locally that comes from `.env`
+(gitignored, loaded by `bin/dev` and `script/api`):
+
+```
+API_TOKEN=4f1b…
+KIOSK_API_URL=http://localhost:3050   # optional, defaults to https://kiosk.grekko.de
+```
 
 ## Conventions
 
@@ -346,3 +361,67 @@ curl -s -X POST -H "$AUTH" "$KIOSK_API/settlements/$SETTLEMENT_ID/send_email"
 
 Payments are deliberately not part of this API — settle and mail here, book
 payments in the web UI.
+
+## Calling the API from this repo
+
+`KioskApi::Client` (`lib/kiosk_api/client.rb`) is a dependency-free
+(`net/http`) wrapper. It reads `API_TOKEN` and `KIOSK_API_URL` from the
+environment, unwraps the top-level response key, and raises
+`KioskApi::RequestError` (with `#status`, `#code`, `#body`) on any non-2xx.
+
+```ruby
+client = KioskApi::Client.new                      # or: .new(url:, token:)
+
+client.clients(active: true)                       # => [ { "id" => 1, … }, … ]
+client.drinks
+client.monthly_reports
+client.settlements(client_id: 1, state: "draft")
+client.settlement(42)
+
+settlement = client.create_settlement(
+  client_id: 1, monthly_report_id: 4, generated_at: "2026-01-31",
+  positions: [ { drink_id: 7, amount: 3 } ]
+)
+
+client.update_settlement(settlement["id"], generated_at: "2026-02-28")
+client.add_position(settlement["id"], drink_id: 9, amount: 1)
+client.update_position(settlement["id"], position_id, amount: 2)
+client.delete_position(settlement["id"], position_id)
+client.complete_settlement(settlement["id"])
+client.send_settlement_email(settlement["id"])
+```
+
+It needs no Rails: `ruby -r./lib/kiosk_api -r./lib/kiosk_api/client -e …` works,
+and inside `bin/rails console` it is autoloaded.
+
+### `script/api`
+
+The same thing as a CLI, printing pretty JSON. It loads `.env` itself, so it
+works straight from a checkout:
+
+```bash
+script/api clients --active
+script/api drinks
+script/api monthly-reports
+script/api settlements --client-id 1 --state draft
+script/api settlement 42
+
+script/api create-settlement --client-id 1 --monthly-report-id 4 \
+                             --generated-at 2026-01-31 --positions 7:3,9:1
+script/api update-settlement 42 --generated-at 2026-02-28
+script/api add-position 42 --drink-id 9 --amount 1
+script/api update-position 42 91 --amount 2
+script/api delete-position 42 91
+script/api complete 42
+script/api send-email 42
+```
+
+`--positions` takes `DRINK_ID:AMOUNT` pairs separated by commas. Errors print
+the API's message to stderr and exit non-zero, e.g.
+
+```
+422 invalid_transition: Event 'complete' cannot transition from 'completed'.
+```
+
+Run `script/api` without arguments for the full usage. To point it at a local
+server: `KIOSK_API_URL=http://localhost:3050 script/api clients`.

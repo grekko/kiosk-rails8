@@ -12,10 +12,11 @@ class Api::BaseController < ActionController::API
   rescue_from ActionController::ParameterMissing, with: :render_parameter_missing
   rescue_from AASM::InvalidTransition, with: :render_invalid_transition
 
-  # Reading the token through a class method keeps credential lookup in one
-  # place and makes it easy to stub in tests.
+  # Reading the token through a class method keeps the lookup in one place and
+  # makes it easy to stub in tests. Credentials win; ENV["API_TOKEN"] is the
+  # fallback for environments without a master key (and for local development).
   def self.api_token
-    Rails.application.credentials.dig(:api, :token)
+    Rails.application.credentials.dig(:api, :token).presence || ENV["API_TOKEN"]
   end
 
   private

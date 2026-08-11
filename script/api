@@ -1,0 +1,129 @@
+#!/usr/bin/env ruby
+# Thin CLI over KioskApi::Client — talks to the Kiosk JSON API (docs/api.md).
+# Reads API_TOKEN (and optionally KIOSK_API_URL) from .env or the environment.
+require "json"
+require_relative "../lib/env_file"
+require_relative "../lib/kiosk_api"
+require_relative "../lib/kiosk_api/client"
+
+EnvFile.load(File.expand_path("../.env", __dir__))
+
+USAGE = <<~TEXT
+  Usage: script/api <command> [options]
+
+  Reading
+    clients [--active]
+    drinks
+    monthly-reports
+    settlements [--client-id N] [--monthly-report-id N] [--state draft|completed|paid]
+    settlement ID
+
+  Settlement workflow
+    create-settlement --client-id N --monthly-report-id N --generated-at YYYY-MM-DD [--positions 7:3,9:1]
+    update-settlement ID [--client-id N] [--monthly-report-id N] [--generated-at YYYY-MM-DD] [--paid-at TIME]
+    complete ID
+    send-email ID
+
+  Positions
+    add-position SETTLEMENT_ID --drink-id N --amount N
+    update-position SETTLEMENT_ID POSITION_ID [--drink-id N] [--amount N]
+    delete-position SETTLEMENT_ID POSITION_ID
+
+  Options: KIOSK_API_URL overrides the host (default #{KioskApi::Client::DEFAULT_URL}).
+TEXT
+
+def die(message)
+  warn message
+  exit 1
+end
+
+# --client-id 3 --active  =>  { client_id: "3", active: true }
+def parse_options(argv)
+  options = {}
+
+  until argv.empty?
+    flag = argv.shift
+    die("Unexpected argument: #{flag}\n\n#{USAGE}") unless flag.start_with?("--")
+
+    key = flag.delete_prefix("--").tr("-", "_").to_sym
+    options[key] = argv.first&.start_with?("--") == false ? argv.shift : true
+  end
+
+  options
+end
+
+# "7:3,9:1"  =>  [ { drink_id: 7, amount: 3 }, { drink_id: 9, amount: 1 } ]
+def parse_positions(value)
+  return [] if value.nil? || value == true
+
+  value.split(",").map do |pair|
+    drink_id, amount = pair.split(":")
+    die("Positions must look like DRINK_ID:AMOUNT, got #{pair.inspect}") if amount.nil?
+
+    { drink_id: Integer(drink_id), amount: Integer(amount) }
+  end
+end
+
+def require_id(argv, name = "ID")
+  argv.shift || die("Missing #{name}\n\n#{USAGE}")
+end
+
+def run(command, client)
+  case command
+  when "clients"
+    client.clients(**parse_options(ARGV).slice(:active))
+  when "drinks"
+    client.drinks
+  when "monthly-reports"
+    client.monthly_reports
+  when "settlements"
+    client.settlements(**parse_options(ARGV).slice(:client_id, :monthly_report_id, :state))
+  when "settlement"
+    client.settlement(require_id(ARGV))
+  when "create-settlement"
+    options = parse_options(ARGV)
+    client.create_settlement(
+      client_id: options.fetch(:client_id) { die("--client-id is required") },
+      monthly_report_id: options.fetch(:monthly_report_id) { die("--monthly-report-id is required") },
+      generated_at: options.fetch(:generated_at) { die("--generated-at is required") },
+      positions: parse_positions(options[:positions])
+    )
+  when "update-settlement"
+    id = require_id(ARGV)
+    attributes = parse_options(ARGV).slice(:client_id, :monthly_report_id, :generated_at, :paid_at)
+    die("Nothing to update") if attributes.empty?
+    client.update_settlement(id, **attributes)
+  when "complete"
+    client.complete_settlement(require_id(ARGV))
+  when "send-email"
+    client.send_settlement_email(require_id(ARGV))
+  when "add-position"
+    settlement_id = require_id(ARGV, "SETTLEMENT_ID")
+    options = parse_options(ARGV)
+    client.add_position(
+      settlement_id,
+      drink_id: options.fetch(:drink_id) { die("--drink-id is required") },
+      amount: options.fetch(:amount) { die("--amount is required") }
+    )
+  when "update-position"
+    settlement_id = require_id(ARGV, "SETTLEMENT_ID")
+    position_id = require_id(ARGV, "POSITION_ID")
+    attributes = parse_options(ARGV).slice(:drink_id, :amount)
+    die("Nothing to update") if attributes.empty?
+    client.update_position(settlement_id, position_id, **attributes)
+  when "delete-position"
+    settlement_id = require_id(ARGV, "SETTLEMENT_ID")
+    client.delete_position(settlement_id, require_id(ARGV, "POSITION_ID"))
+  else
+    die("Unknown command: #{command}\n\n#{USAGE}")
+  end
+end
+
+command = ARGV.shift
+die(USAGE) if command.nil? || %w[-h --help help].include?(command)
+
+begin
+  puts JSON.pretty_generate(run(command, KioskApi::Client.new))
+rescue KioskApi::Error => e
+  die(e.message)
+end

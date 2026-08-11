@@ -17,7 +17,15 @@ bin/dev     # start the server (Puma) at http://localhost:3050
 
 ## JSON API
 
-Clients and the settlement workflow (create, update, complete, mail) are also available as an internal JSON API under `/api`, authenticated with a bearer token from the Rails credentials (`api.token`).
+Clients and the settlement workflow (create, update, complete, mail) are also available as an internal JSON API under `/api`, authenticated with a bearer token from the Rails credentials (`api.token`, falling back to `ENV["API_TOKEN"]`).
+
+Call it from this repo with `KioskApi::Client` or the `script/api` CLI, both of which read `API_TOKEN` (and the optional `KIOSK_API_URL`) from `.env`:
+
+```bash
+script/api clients --active
+script/api create-settlement --client-id 1 --monthly-report-id 4 --generated-at 2026-01-31 --positions 7:3
+script/api complete 42 && script/api send-email 42
+```
 
 See [docs/api.md](docs/api.md).
 
