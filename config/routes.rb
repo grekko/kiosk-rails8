@@ -16,6 +16,21 @@ Rails.application.routes.draw do
     resources :settlement_tracking, only: %i[show]
   end
 
+  namespace :api do
+    resources :clients, only: %i[index]
+    resources :drinks, only: %i[index]
+    resources :monthly_reports, only: %i[index]
+
+    resources :settlements, only: %i[index show create update] do
+      member do
+        post :complete
+        post :send_email
+      end
+
+      resources :positions, controller: "settlement_positions", only: %i[create update destroy]
+    end
+  end
+
   resources :payments, only: %i[index]
 
   resources :orders, except: %i[show destroy] do
