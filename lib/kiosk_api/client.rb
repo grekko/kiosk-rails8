@@ -34,8 +34,16 @@ module KioskApi
       get("drinks").fetch("drinks")
     end
 
-    def monthly_reports
-      get("monthly_reports").fetch("monthly_reports")
+    def monthly_reports(state: nil)
+      get("monthly_reports", state: state).fetch("monthly_reports")
+    end
+
+    def complete_monthly_report(id)
+      post("monthly_reports/#{id}/complete").fetch("monthly_report")
+    end
+
+    def reopen_monthly_report(id)
+      post("monthly_reports/#{id}/reopen").fetch("monthly_report")
     end
 
     def settlements(client_id: nil, monthly_report_id: nil, state: nil)

@@ -50,6 +50,20 @@ class KioskApi::ClientTest < ActiveSupport::TestCase
     assert_equal "POST /api/settlements/42/send_email HTTP/1.1", request[:line]
   end
 
+  test "monthly report actions hit the nested routes" do
+    request = serve(body: { monthly_report: { id: 4, state: "completed" } }.to_json) do |url|
+      assert_equal "completed", client(url).complete_monthly_report(4)["state"]
+    end
+
+    assert_equal "POST /api/monthly_reports/4/complete HTTP/1.1", request[:line]
+
+    request = serve(body: { monthly_reports: [] }.to_json) do |url|
+      client(url).monthly_reports(state: "draft")
+    end
+
+    assert_equal "GET /api/monthly_reports?state=draft HTTP/1.1", request[:line]
+  end
+
   test "delete_position tolerates an empty response body" do
     request = serve(status: 204, body: "") do |url|
       assert client(url).delete_position(42, 91)

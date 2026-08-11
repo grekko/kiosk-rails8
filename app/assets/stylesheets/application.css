@@ -130,6 +130,13 @@ header nav ol {
   margin-top: 300px;
 }
 
+.report-filters {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 15px 0;
+}
+
 .settlement-form {
   display: flex;
   align-items: flex-start;

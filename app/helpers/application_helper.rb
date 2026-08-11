@@ -1,16 +1,24 @@
 module ApplicationHelper
-  SETTLEMENT_STATUS_EMOJI = {
+  STATUS_EMOJI = {
     "draft" => "📝",
     "completed" => "✅",
     "paid" => "💶"
   }.freeze
 
   def settlement_status_emoji(settlement)
-    state = settlement.aasm_state.to_s
+    status_emoji(settlement.aasm_state)
+  end
+
+  def monthly_report_status_emoji(monthly_report)
+    status_emoji(monthly_report.state)
+  end
+
+  def status_emoji(state)
+    state = state.to_s
     label = state.humanize
     content_tag(
       :span,
-      SETTLEMENT_STATUS_EMOJI.fetch(state, state),
+      STATUS_EMOJI.fetch(state, state),
       title: label,
       "aria-label": label
     )
