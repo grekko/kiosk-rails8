@@ -1,9 +1,9 @@
-CREATE TABLE IF NOT EXISTS "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
-CREATE TABLE IF NOT EXISTS "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY);
-CREATE TABLE IF NOT EXISTS "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6), "access_uuid" text, "email" text);
-CREATE TABLE IF NOT EXISTS "orders" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "ordered_at" date NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
-CREATE TABLE IF NOT EXISTS "drinks" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
-CREATE TABLE IF NOT EXISTS "order_positions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "order_id" integer NOT NULL, "drink_id" integer NOT NULL, "amount" integer DEFAULT 0 NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "deposit_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "total_price_in_cents"  GENERATED ALWAYS AS (price_in_cents + deposit_in_cents) VIRTUAL, CONSTRAINT "fk_rails_41ffabeca6"
+CREATE TABLE "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
+CREATE TABLE "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY);
+CREATE TABLE "clients" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "suspended_at" datetime(6), "access_uuid" text, "email" text);
+CREATE TABLE "orders" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "ordered_at" date NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
+CREATE TABLE "drinks" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
+CREATE TABLE "order_positions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "order_id" integer NOT NULL, "drink_id" integer NOT NULL, "amount" integer DEFAULT 0 NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "deposit_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "total_price_in_cents"  GENERATED ALWAYS AS (price_in_cents + deposit_in_cents) VIRTUAL, CONSTRAINT "fk_rails_41ffabeca6"
 FOREIGN KEY ("order_id")
   REFERENCES "orders" ("id")
 , CONSTRAINT "fk_rails_7dbe8a92c4"
@@ -12,7 +12,7 @@ FOREIGN KEY ("drink_id")
 );
 CREATE INDEX "index_order_positions_on_order_id" ON "order_positions" ("order_id");
 CREATE INDEX "index_order_positions_on_drink_id" ON "order_positions" ("drink_id");
-CREATE TABLE IF NOT EXISTS "settlement_positions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "settlement_id" integer NOT NULL, "drink_id" integer NOT NULL, "amount" integer DEFAULT 1 NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_643a9db810"
+CREATE TABLE "settlement_positions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "settlement_id" integer NOT NULL, "drink_id" integer NOT NULL, "amount" integer DEFAULT 1 NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_643a9db810"
 FOREIGN KEY ("settlement_id")
   REFERENCES "settlements" ("id")
 , CONSTRAINT "fk_rails_4fbd36354c"
@@ -21,26 +21,26 @@ FOREIGN KEY ("drink_id")
 );
 CREATE INDEX "index_settlement_positions_on_settlement_id" ON "settlement_positions" ("settlement_id");
 CREATE INDEX "index_settlement_positions_on_drink_id" ON "settlement_positions" ("drink_id");
-CREATE TABLE IF NOT EXISTS "settlement_prices" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "drink_id" integer NOT NULL, "valid_from" date NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "deactivated_at" datetime(6), CONSTRAINT "fk_rails_c777451a4b"
+CREATE TABLE "settlement_prices" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "drink_id" integer NOT NULL, "valid_from" date NOT NULL, "price_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "deactivated_at" datetime(6), CONSTRAINT "fk_rails_c777451a4b"
 FOREIGN KEY ("drink_id")
   REFERENCES "drinks" ("id")
 );
 CREATE INDEX "index_settlement_prices_on_drink_id" ON "settlement_prices" ("drink_id");
-CREATE TABLE IF NOT EXISTS "monthly_reports" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "title" text, "description" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "completed_at" datetime(6));
-CREATE TABLE IF NOT EXISTS "active_storage_blobs" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar NOT NULL, "filename" varchar NOT NULL, "content_type" varchar, "metadata" text, "service_name" varchar NOT NULL, "byte_size" bigint NOT NULL, "checksum" varchar, "created_at" datetime(6) NOT NULL);
+CREATE TABLE "monthly_reports" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "title" text, "description" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "completed_at" datetime(6) /*application='Kiosk'*/);
+CREATE TABLE "active_storage_blobs" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar NOT NULL, "filename" varchar NOT NULL, "content_type" varchar, "metadata" text, "service_name" varchar NOT NULL, "byte_size" bigint NOT NULL, "checksum" varchar, "created_at" datetime(6) NOT NULL);
 CREATE UNIQUE INDEX "index_active_storage_blobs_on_key" ON "active_storage_blobs" ("key");
-CREATE TABLE IF NOT EXISTS "active_storage_attachments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "record_type" varchar NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_c3b3935057"
+CREATE TABLE "active_storage_attachments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "record_type" varchar NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_c3b3935057"
 FOREIGN KEY ("blob_id")
   REFERENCES "active_storage_blobs" ("id")
 );
 CREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id");
 CREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id");
-CREATE TABLE IF NOT EXISTS "active_storage_variant_records" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "blob_id" bigint NOT NULL, "variation_digest" varchar NOT NULL, CONSTRAINT "fk_rails_993965df05"
+CREATE TABLE "active_storage_variant_records" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "blob_id" bigint NOT NULL, "variation_digest" varchar NOT NULL, CONSTRAINT "fk_rails_993965df05"
 FOREIGN KEY ("blob_id")
   REFERENCES "active_storage_blobs" ("id")
 );
 CREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest");
-CREATE TABLE IF NOT EXISTS "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, "email_sent_at" datetime(6), "email_first_opened_at" datetime(6), CONSTRAINT "fk_rails_4a7bf0e43f"
+CREATE TABLE "settlements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "generated_at" date NOT NULL, "paid_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "aasm_state" varchar DEFAULT 'draft' NOT NULL, "completed_at" datetime(6), "monthly_report_id" integer NOT NULL, "payment_id" integer, "email_sent_at" datetime(6), "email_first_opened_at" datetime(6), CONSTRAINT "fk_rails_4a7bf0e43f"
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 , CONSTRAINT "fk_rails_5c7519b292"
@@ -55,7 +55,7 @@ CREATE INDEX "index_settlements_on_monthly_report_id" ON "settlements" ("monthly
 CREATE INDEX "index_settlements_on_payment_id" ON "settlements" ("payment_id");
 CREATE UNIQUE INDEX "index_clients_on_access_uuid" ON "clients" ("access_uuid");
 CREATE UNIQUE INDEX "index_clients_on_email" ON "clients" ("email");
-CREATE TABLE IF NOT EXISTS "payments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "amount_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_66d0485df7"
+CREATE TABLE "payments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_id" integer NOT NULL, "amount_in_cents" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_66d0485df7"
 FOREIGN KEY ("client_id")
   REFERENCES "clients" ("id")
 );
