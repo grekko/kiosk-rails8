@@ -33,14 +33,14 @@ class External::SettlementTrackingControllerTest < ActionDispatch::IntegrationTe
   end
 
   test "rejects a token signed for another purpose" do
-    assert_raises ActiveSupport::MessageVerifier::InvalidSignature do
-      get external_settlement_tracking_path(@settlement.signed_id(purpose: :something_else))
-    end
+    get external_settlement_tracking_path(@settlement.signed_id(purpose: :something_else))
+
+    assert_response :not_found
   end
 
   test "rejects a garbage token" do
-    assert_raises ActiveSupport::MessageVerifier::InvalidSignature do
-      get external_settlement_tracking_path("not-a-real-token")
-    end
+    get external_settlement_tracking_path("not-a-real-token")
+
+    assert_response :not_found
   end
 end
