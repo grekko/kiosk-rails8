@@ -5,7 +5,7 @@ class SettlementPosition < ApplicationRecord
   validates :amount, presence: true, numericality: true
   validates :price_in_cents, presence: true, numericality: true
 
-  before_validation :set_price_in_cents, on: :create
+  before_validation :set_price_in_cents
 
   def drink_price_in_cents
     drink.price_in_cents_at(date: settlement.generated_at)
