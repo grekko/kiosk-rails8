@@ -18,6 +18,7 @@ gem "redcarpet" # Markdown processor (solely used to generate plaintext versions
 ## Utils
 gem "aasm"
 gem "image_processing", ">= 1.2"
+gem "ruby-vips", "~> 2.0"
 gem "postmark-rails"
 gem "rqrcode"
 gem "sentry-rails"
