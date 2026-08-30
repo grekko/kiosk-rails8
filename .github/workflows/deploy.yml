@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [ CI ]
+    types: [ completed ]
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # workflow_run fires for failed CI too, so gate on the conclusion.
+    # workflow_dispatch has no workflow_run context and always passes.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # workflow_run checks out the default branch by default, which may
+          # already be ahead of the commit CI went green on.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Resolve SHA
+        id: sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Join tailnet
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          args: --accept-dns=true
+
+      - name: Build and push image
+        env:
+          REGISTRY: diskstation.tail9a6aa.ts.net:5005
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          docker build --platform linux/amd64 --build-arg KIOSK_SHA="$SHA" \
+            -t "$REGISTRY/kiosk:$SHA" -t "$REGISTRY/kiosk:latest" .
+          docker image push "$REGISTRY/kiosk:$SHA"
+          docker image push "$REGISTRY/kiosk:latest"
+
+      - name: Checkout stack repo
+        uses: actions/checkout@v7
+        with:
+          repository: grekko/dsm
+          token: ${{ secrets.DSM_DEPLOY_TOKEN }}
+          path: dsm
+
+      - name: Pin stack to new tag
+        working-directory: dsm
+        env:
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          ENV_PATH=portainer-stacks/kiosk/.env
+          grep -q '^KIOSK_TAG=' "$ENV_PATH" || { echo "No KIOSK_TAG line in $ENV_PATH" >&2; exit 1; }
+          if grep -q "^KIOSK_TAG=$SHA\$" "$ENV_PATH"; then
+            echo "Already pinned to $SHA — nothing to deploy."
+            exit 0
+          fi
+          sed -i -E "s|^KIOSK_TAG=.*|KIOSK_TAG=$SHA|" "$ENV_PATH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Deploy kiosk $SHA" -- "$ENV_PATH"
+          git push

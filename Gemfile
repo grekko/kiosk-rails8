@@ -33,7 +33,6 @@ gem "solid_queue"
 gem "bootsnap", require: false
 
 ## Deployment
-gem "kamal", require: false # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
 gem "thruster", require: false # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 
 group :development, :test do

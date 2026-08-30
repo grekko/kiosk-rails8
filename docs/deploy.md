@@ -1,8 +1,8 @@
 # Deploy
 
-The Docker image is built locally, pushed to the private registry on the NAS at `192.168.178.35:5005`, and pulled by a Portainer stack.
+The Docker image is built in CI, pushed to the private registry on the NAS at `diskstation.tail9a6aa.ts.net:5005`, and pulled by a Portainer stack.
 
-The stack is managed as code in [`grekko.dsm/portainer-stacks/kiosk`](../../grekko.dsm/portainer-stacks/kiosk). Portainer is configured to pull from that repo — deploys happen by editing the compose file's image tag, committing, and pushing.
+The stack is managed as code in [`grekko.dsm/portainer-stacks/kiosk`](../../grekko.dsm/portainer-stacks/kiosk). Portainer is configured to pull from that repo — deploys happen by editing the image tag in that stack's `.env`, committing, and pushing.
 
 ## Problem: Portainer CE cannot force-repull `:latest`
 
@@ -20,57 +20,41 @@ Benefits:
 - Rollback is a one-line stack edit to the prior SHA.
 - No cache-invalidation fights with Portainer.
 
-## `script/build` — build & push SHA-tagged image
+The SHA is also baked into the image as `KIOSK_SHA` and reported to Sentry as the release, so an error points at the deploy that produced it.
 
-```sh
-#!/bin/sh
-set -e
+## Automatic deploys
 
-REGISTRY="192.168.178.35:5005"
-IMAGE="kiosk"
-SHA="$(git rev-parse --short HEAD)"
+[`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) runs on every push to `main`, gated on CI. It:
 
-if ! git diff --quiet HEAD; then
-  echo "Working tree dirty — commit before building." >&2
-  exit 1
-fi
+1. waits for the CI workflow to finish and exits unless the conclusion is `success`,
+2. checks out the exact commit CI went green on — not the branch head, which may already have moved,
+3. joins the tailnet via a Tailscale OAuth client tagged `tag:ci`, which is how the runner reaches the NAS registry at all,
+4. builds and pushes `kiosk:<sha>` and `kiosk:latest`,
+5. bumps `KIOSK_TAG` in the stack repo's `.env` and pushes.
 
-docker build --platform linux/x86_64 -t "$IMAGE:$SHA" .
-docker image tag "$IMAGE:$SHA" "$REGISTRY/$IMAGE:$SHA"
-docker image tag "$IMAGE:$SHA" "$REGISTRY/$IMAGE:latest"
+`concurrency: deploy` serialises runs so two merges in quick succession can't race to pin the tag.
 
-docker image push "$REGISTRY/$IMAGE:$SHA"
-docker image push "$REGISTRY/$IMAGE:latest"
+It can also be triggered by hand from the Actions tab (`workflow_dispatch`), which skips the CI gate and deploys whatever is on `main`.
 
-echo
-echo "Pushed $REGISTRY/$IMAGE:$SHA"
-echo "Update Portainer stack image reference to this tag and redeploy."
-```
+### Required secrets
 
-The dirty-tree guard prevents builds that can't be traced back to a single commit.
+| Secret | Purpose |
+| --- | --- |
+| `TS_OAUTH_CLIENT_ID` | Tailscale OAuth client, `tag:ci` — reaching the registry |
+| `TS_OAUTH_SECRET` | ditto |
+| `DSM_DEPLOY_TOKEN` | PAT with write access to `grekko/dsm` — committing the tag bump |
 
-`:latest` is still pushed as a convenience pointer — it's never used for deploys, only for ad-hoc `docker run` against the registry.
+The registry itself is unauthenticated; tailnet membership is the access control.
 
-## Deploy steps
+## Manual deploys
 
-1. Commit all changes in this repo.
-2. Run `script/deploy`. It:
-   - runs `script/build` (build + push SHA + latest to registry),
-   - updates `KIOSK_TAG` in `grekko.dsm/portainer-stacks/kiosk/stack.env`,
-   - commits and pushes the stack repo.
+`script/deploy` does the same thing from a laptop, and stays as the escape hatch for when CI is down or the tailnet is misbehaving. It expects `grekko.dsm` checked out as a sibling directory, refuses to run on a dirty tree, and no-ops when the stack is already pinned to the current SHA. `script/build` is the build-and-push half on its own.
 
-Portainer redeploys on its next git-poll interval.
-
-The stack compose file references `image: 192.168.178.35:5005/kiosk:${KIOSK_TAG}` — only `stack.env` changes per deploy, so diffs stay clean.
+Both push `:latest` as a convenience pointer — it's never used for deploys, only for ad-hoc `docker run` against the registry.
 
 ## Rollback
 
-```sh
-# set KIOSK_TAG to prior SHA in grekko.dsm/portainer-stacks/kiosk/stack.env
-# commit + push; webhook redeploys
-```
-
-No rebuild — old tags stay in the registry.
+Set `KIOSK_TAG` back to the prior SHA in `grekko.dsm/portainer-stacks/kiosk/.env`, commit, push. Portainer redeploys on its next git-poll interval. No rebuild — old tags stay in the registry.
 
 ## Cleanup
 
