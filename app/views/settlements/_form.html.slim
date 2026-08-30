@@ -45,4 +45,4 @@
       .settlement-form__monthly-report-image
         = link_to "Back to the Report", edit_monthly_report_path(settlement.monthly_report)
 
-        = image_tag settlement.monthly_report.image.url
+        = report_attachment_tag settlement.monthly_report.image
