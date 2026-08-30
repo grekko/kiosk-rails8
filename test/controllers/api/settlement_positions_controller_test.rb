@@ -35,6 +35,8 @@ class Api::SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal 5, position.reload.amount
+    assert_equal 600, position.price_in_cents
+    assert_equal 600, @settlement.reload.price_in_cents
   end
 
   test "destroy removes the position" do

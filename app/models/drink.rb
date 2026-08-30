@@ -9,7 +9,7 @@ class Drink < ApplicationRecord
   end
 
   def settlement_price(date:)
-    settlement_prices.order(valid_from: :desc).find_by(valid_from: Range.new(nil, date))
+    settlement_prices.active.order(valid_from: :desc).find_by(valid_from: Range.new(nil, date))
   end
 
   def current_price_in_cents = price_in_cents_at(date: Date.today)
