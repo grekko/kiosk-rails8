@@ -43,4 +43,19 @@ class DrinkTest < ActiveSupport::TestCase
 
     assert_equal 150, @drink.price_in_cents_at(date: Date.current)
   end
+
+  test "ignores deactivated settlement prices" do
+    price = @drink.settlement_prices.create!(valid_from: 1.year.ago.to_date, price_in_cents: 150)
+    price.deactivate
+
+    assert_equal 120, @drink.price_in_cents_at(date: Date.current)
+    assert_nil @drink.current_settlement_price
+  end
+
+  test "falls back to the newest active price when a newer one is deactivated" do
+    @drink.settlement_prices.create!(valid_from: 2.years.ago.to_date, price_in_cents: 100)
+    @drink.settlement_prices.create!(valid_from: 1.year.ago.to_date, price_in_cents: 150).deactivate
+
+    assert_equal 100, @drink.price_in_cents_at(date: Date.current)
+  end
 end
