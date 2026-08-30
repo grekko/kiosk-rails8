@@ -14,6 +14,12 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_match 'type="application/pdf"', tag
   end
 
+  test "report_attachment_tag renders nothing when no attachment exists" do
+    report = MonthlyReport.create!(title: "January")
+
+    assert_nil report_attachment_tag(report.image)
+  end
+
   test "rounded_up_full_euro_in_cents rounds strictly to next full euro" do
     assert_equal 200, rounded_up_full_euro_in_cents(120)
     assert_equal 300, rounded_up_full_euro_in_cents(250)
