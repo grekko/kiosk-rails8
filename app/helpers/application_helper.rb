@@ -28,6 +28,7 @@ module ApplicationHelper
   # PDFs — those render as a broken image in an <img>, so they get an <embed>
   # instead (same as the order invoice preview).
   def report_attachment_tag(attachment)
+    return unless attachment.attached?
     return image_tag(attachment.url) unless attachment.content_type == "application/pdf"
 
     tag.embed(src: attachment.url, type: attachment.content_type, class: "report-attachment-pdf")
