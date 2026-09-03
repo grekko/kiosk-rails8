@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
+# This Dockerfile is designed for production, not development. Built and pushed by
+# .github/workflows/deploy.yml (or script/build by hand), or build'n'run locally:
 # docker build -t kiosk .
 # docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name kiosk kiosk
 
