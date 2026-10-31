@@ -1,9 +1,7 @@
 require "test_helper"
 
 class PaymentsControllerTest < ActionDispatch::IntegrationTest
-  AUTH = {
-    "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("kiosk", "sup3r-s3cr37")
-  }.freeze
+  AUTH = BasicAuthHelpers::HEADERS
 
   test "new renders the form prefilled with the outstanding amount" do
     client = Client.create!(name: "Payer-#{SecureRandom.hex(4)}")
