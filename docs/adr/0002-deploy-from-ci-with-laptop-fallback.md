@@ -4,4 +4,4 @@ Deploys used to be run by hand from a laptop. Since #209, `.github/workflows/dep
 
 ## Consequences
 
-CI needs the `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET` and `DSM_DEPLOY_TOKEN` secrets, and both paths have to stay equivalent: a change to one deploy path must be made in the other too.
+CI needs the `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET` and `DSM_DEPLOY_TOKEN` secrets. Both paths run the same steps.
