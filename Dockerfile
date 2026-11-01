@@ -8,8 +8,8 @@
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=4.0.6
+# deploy.yml and script/build pass RUBY_VERSION from .ruby-version; this default only matters for plain docker build
+ARG RUBY_VERSION=4.0.7
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
