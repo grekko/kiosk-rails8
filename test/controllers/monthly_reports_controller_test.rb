@@ -1,9 +1,7 @@
 require "test_helper"
 
 class MonthlyReportsControllerTest < ActionDispatch::IntegrationTest
-  AUTH = {
-    "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("kiosk", "sup3r-s3cr37")
-  }.freeze
+  AUTH = BasicAuthHelpers::HEADERS
 
   setup do
     @report = MonthlyReport.create!(title: "Report-#{SecureRandom.hex(4)}")
