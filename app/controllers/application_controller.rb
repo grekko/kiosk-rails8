@@ -10,6 +10,12 @@ class ApplicationController < ActionController::Base
 
   before_action :basic_auth
 
+  # Read through a class method so tests can stub it, as Api::BaseController
+  # does for its token. Without `basic_auth` in the credentials nobody gets in.
+  def self.basic_auth_credentials
+    Rails.application.credentials.basic_auth&.values_at(:username, :password)
+  end
+
   def basic_auth
     return if authenticated_via_cookie?
     return if authenticate_with_http_basic { |user, password| handle_basic_auth(user, password) }
@@ -31,7 +37,11 @@ class ApplicationController < ActionController::Base
   end
 
   def valid_authentication?(username, password)
-    username == "kiosk" && password == "sup3r-s3cr37"
+    expected_username, expected_password = self.class.basic_auth_credentials
+    return false if expected_username.blank? || expected_password.blank?
+
+    ActiveSupport::SecurityUtils.secure_compare(username, expected_username) &
+      ActiveSupport::SecurityUtils.secure_compare(password, expected_password)
   end
 
   def persist_auth_cookie

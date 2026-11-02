@@ -44,6 +44,7 @@ jobs:
           SHA: ${{ steps.sha.outputs.sha }}
         run: |
           docker build --platform linux/amd64 --build-arg KIOSK_SHA="$SHA" \
+            --build-arg RUBY_VERSION="$(sed 's/^ruby-//' .ruby-version)" \
             -t "$REGISTRY/kiosk:$SHA" -t "$REGISTRY/kiosk:latest" .
           docker image push "$REGISTRY/kiosk:$SHA"
           docker image push "$REGISTRY/kiosk:latest"

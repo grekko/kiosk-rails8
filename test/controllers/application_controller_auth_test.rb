@@ -1,9 +1,7 @@
 require "test_helper"
 
 class ApplicationControllerAuthTest < ActionDispatch::IntegrationTest
-  BASIC_AUTH_HEADER = {
-    "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("kiosk", "sup3r-s3cr37")
-  }.freeze
+  BASIC_AUTH_HEADER = BasicAuthHelpers::HEADERS
 
   test "request without credentials is challenged" do
     get root_path
@@ -25,6 +23,16 @@ class ApplicationControllerAuthTest < ActionDispatch::IntegrationTest
 
     get root_path
     assert_response :success
+  end
+
+  test "without a configured login every basic auth attempt is rejected" do
+    original = ApplicationController.method(:basic_auth_credentials)
+    ApplicationController.define_singleton_method(:basic_auth_credentials) { nil }
+
+    get root_path, headers: BASIC_AUTH_HEADER
+    assert_response :unauthorized
+  ensure
+    ApplicationController.define_singleton_method(:basic_auth_credentials, original)
   end
 
   test "tampered cookie value is rejected" do
