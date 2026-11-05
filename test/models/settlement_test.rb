@@ -20,9 +20,22 @@ class SettlementTest < ActiveSupport::TestCase
 
     assert_raises(AASM::InvalidTransition) { settlement.mark_paid! }
 
+    assert_nil settlement.paid_at
+    assert_not settlement.paid_at_changed?
+
     settlement.reload
     assert settlement.draft?
     assert_nil settlement.paid_at
+  end
+
+  test "complete is rejected for a paid settlement and leaves completed_at unset" do
+    settlement = create_settlement
+    settlement.update!(aasm_state: "paid")
+
+    assert_raises(AASM::InvalidTransition) { settlement.complete! }
+
+    assert_nil settlement.completed_at
+    assert_not settlement.completed_at_changed?
   end
 
   test "schedule_email_delivery returns false when the client has no email" do
