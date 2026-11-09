@@ -122,6 +122,19 @@ class SettlementTest < ActiveSupport::TestCase
     assert_equal payment, settlement.payment
   end
 
+  test "email delivery still works on a completed settlement after its drink price changed" do
+    settlement = create_settlement
+    drink = Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150)
+    settlement.positions.create!(drink:, amount: 2)
+    settlement.complete!
+    drink.update!(price_in_cents: 999)
+
+    settlement = Settlement.includes(:positions).find(settlement.id)
+
+    assert settlement.schedule_email_delivery
+    assert_equal 300, settlement.reload.price_in_cents
+  end
+
   test "mark_paid works on a completed settlement" do
     settlement = create_settlement
     settlement.complete!

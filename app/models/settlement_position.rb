@@ -9,7 +9,8 @@ class SettlementPosition < ApplicationRecord
 
   # Only a real change: Settlement#valid?(:email_delivery) re-validates unchanged loaded positions too.
   validate :settlement_must_be_draft, if: -> { new_record? || changed? }
-  before_validation :set_price_in_cents
+  # A locked position keeps its price; re-pricing would make it look changed after a Drink price edit.
+  before_validation :set_price_in_cents, unless: -> { persisted? && settlement_locked? }
   before_destroy :settlement_must_be_draft_for_destroy
 
   def drink_price_in_cents
