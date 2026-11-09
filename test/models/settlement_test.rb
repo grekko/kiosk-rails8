@@ -144,6 +144,41 @@ class SettlementTest < ActiveSupport::TestCase
     assert settlement.reload.paid?
   end
 
+  test "reopen moves a completed settlement back to draft and clears completed_at" do
+    settlement = create_settlement
+    settlement.complete!
+
+    settlement.reopen!
+
+    settlement.reload
+    assert settlement.draft?
+    assert_nil settlement.completed_at
+    assert settlement.update(generated_at: 1.day.ago)
+  end
+
+  test "reopen is refused for a paid settlement" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.mark_paid!
+
+    assert_raises(AASM::InvalidTransition) { settlement.reopen! }
+
+    assert settlement.reload.paid?
+  end
+
+  test "reopen is refused once the email was sent" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.update!(email_sent_at: Time.current)
+
+    assert_not settlement.may_reopen?
+    assert_raises(AASM::InvalidTransition) { settlement.reopen! }
+
+    settlement.reload
+    assert settlement.completed?
+    assert_not_nil settlement.completed_at
+  end
+
   private
 
   def create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email: "alice@example.com"))

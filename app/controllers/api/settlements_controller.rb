@@ -1,5 +1,5 @@
 class Api::SettlementsController < Api::BaseController
-  before_action :set_settlement, only: %i[ show update complete send_email ]
+  before_action :set_settlement, only: %i[ show update complete reopen send_email ]
 
   def index
     settlements = Settlement.includes(:client, :monthly_report, positions: :drink).newest_first
@@ -36,6 +36,12 @@ class Api::SettlementsController < Api::BaseController
 
   def complete
     @settlement.complete!
+
+    render_settlement
+  end
+
+  def reopen
+    @settlement.reopen!
 
     render_settlement
   end

@@ -48,6 +48,12 @@ class KioskApi::ClientTest < ActiveSupport::TestCase
     end
 
     assert_equal "POST /api/settlements/42/send_email HTTP/1.1", request[:line]
+
+    request = serve(body: { settlement: { id: 42, state: "draft" } }.to_json) do |url|
+      assert_equal "draft", client(url).reopen_settlement(42)["state"]
+    end
+
+    assert_equal "POST /api/settlements/42/reopen HTTP/1.1", request[:line]
   end
 
   test "monthly report actions hit the nested routes" do

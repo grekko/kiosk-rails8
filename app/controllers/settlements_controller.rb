@@ -1,5 +1,5 @@
 class SettlementsController < ApplicationController
-  before_action :set_settlement, only: %i[ edit update destroy complete schedule_email ]
+  before_action :set_settlement, only: %i[ edit update destroy complete reopen schedule_email ]
 
   def index
     @settlements = Settlement.includes(:client, :monthly_report).newest_first.all
@@ -44,6 +44,17 @@ class SettlementsController < ApplicationController
   def complete
     @settlement.complete!
     redirect_to settlements_path
+  end
+
+  def reopen
+    if @settlement.may_reopen?
+      @settlement.reopen!
+      flash[:notice] = "Settlement moved back to draft."
+    else
+      flash[:alert] = "A paid or emailed settlement can't be moved back to draft."
+    end
+
+    redirect_to edit_settlement_path(@settlement)
   end
 
   def schedule_email

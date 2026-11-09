@@ -166,6 +166,51 @@ class Api::SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert settlement.reload.completed?
   end
 
+  test "reopen moves a completed settlement back to draft" do
+    settlement = create_settlement
+    settlement.complete!
+
+    with_api_token do
+      post reopen_api_settlement_path(settlement), headers: api_headers
+    end
+
+    assert_response :success
+    assert_equal "draft", response.parsed_body["settlement"]["state"]
+    assert_nil response.parsed_body["settlement"]["completed_at"]
+    assert settlement.reload.draft?
+  end
+
+  test "reopen refuses a paid settlement" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.mark_paid!
+
+    with_api_token do
+      post reopen_api_settlement_path(settlement), headers: api_headers
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "invalid_transition", response.parsed_body["error"]
+    assert_equal "Event 'reopen' cannot transition from 'paid'.", response.parsed_body["message"]
+    assert settlement.reload.paid?
+  end
+
+  test "reopen refuses an emailed settlement" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.update!(email_sent_at: Time.current)
+
+    with_api_token do
+      post reopen_api_settlement_path(settlement), headers: api_headers
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "invalid_transition", response.parsed_body["error"]
+    assert_equal "Event 'reopen' cannot transition from 'completed'. Failed callback(s): [:email_not_sent?].",
+                 response.parsed_body["message"]
+    assert settlement.reload.completed?
+  end
+
   test "send_email delivers the settlement mail once" do
     settlement = create_settlement
 

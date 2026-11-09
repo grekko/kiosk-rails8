@@ -27,6 +27,7 @@ USAGE = <<~TEXT
     create-settlement --client-id N --monthly-report-id N --generated-at YYYY-MM-DD [--positions 7:3,9:1]
     update-settlement ID [--client-id N] [--monthly-report-id N] [--generated-at YYYY-MM-DD] [--paid-at TIME]
     complete ID
+    reopen ID
     send-email ID
 
   Positions
@@ -114,6 +115,8 @@ def run(command, client)
     client.update_settlement(id, **attributes)
   when "complete"
     client.complete_settlement(require_id(ARGV))
+  when "reopen"
+    client.reopen_settlement(require_id(ARGV))
   when "send-email"
     client.send_settlement_email(require_id(ARGV))
   when "add-position"
