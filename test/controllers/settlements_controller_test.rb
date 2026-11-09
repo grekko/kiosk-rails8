@@ -87,16 +87,15 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_equal generated_at, settlement.reload.generated_at
   end
 
-  # Open question: only the form's disabled fieldset protects a completed Settlement;
-  # the controller still accepts the update.
-  test "update still changes a completed settlement" do
+  test "update refuses to change a completed settlement" do
     settlement = create_settlement
     settlement.complete!
 
     patch settlement_path(settlement), params: { settlement: { generated_at: "2026-02-28" } }, headers: AUTH
 
-    assert_redirected_to edit_settlement_path(settlement)
-    assert_equal Date.new(2026, 2, 28), settlement.reload.generated_at.to_date
+    assert_response :unprocessable_entity
+    assert_includes response.body, "can no longer be changed once the settlement is completed"
+    assert_equal Date.new(2026, 1, 31), settlement.reload.generated_at.to_date
   end
 
   test "complete moves a draft settlement to completed" do

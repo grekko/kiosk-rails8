@@ -7,8 +7,7 @@ class External::ClientControllerTest < ActionDispatch::IntegrationTest
     settlement = Settlement.create!(
       client: client,
       monthly_report: report,
-      generated_at: Date.current,
-      aasm_state: "completed"
+      generated_at: Date.current
     )
     drink = Drink.create!(name: "Pils", price_in_cents: 120)
     SettlementPosition.create!(
@@ -17,6 +16,7 @@ class External::ClientControllerTest < ActionDispatch::IntegrationTest
       amount: 1,
       price_in_cents: 120
     )
+    settlement.complete!
 
     get external_client_path(client.access_uuid)
 

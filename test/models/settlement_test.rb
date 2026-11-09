@@ -79,6 +79,58 @@ class SettlementTest < ActiveSupport::TestCase
     assert_equal 3 * 150 + 2 * 220, settlement.price_in_cents
   end
 
+  test "a draft can change its date, client and monthly report" do
+    settlement = create_settlement
+
+    assert settlement.update(generated_at: 1.day.ago, client: Client.create!(name: "Bob-#{SecureRandom.hex(4)}"), monthly_report: MonthlyReport.create!(title: "February"))
+  end
+
+  %w[completed paid].each do |state|
+    test "a #{state} settlement refuses changes to its date, client and monthly report" do
+      settlement = create_settlement
+      settlement.update_column(:aasm_state, state)
+
+      assert_not settlement.update(generated_at: 1.day.ago)
+      assert_includes settlement.errors[:generated_at], Settlement::LOCKED_MESSAGE
+      assert_not settlement.update(client: Client.create!(name: "Bob-#{SecureRandom.hex(4)}"))
+      assert_not settlement.update(monthly_report: MonthlyReport.create!(title: "February"))
+    end
+  end
+
+  test "setting the state back to draft in the same save does not unlock it" do
+    settlement = create_settlement
+    settlement.complete!
+
+    assert_not settlement.update(aasm_state: "draft", generated_at: 1.day.ago)
+  end
+
+  test "a completed settlement with positions still gets marked paid, emailed and linked to a payment" do
+    settlement = create_settlement
+    settlement.positions.create!(drink: Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150), amount: 2)
+    settlement.complete!
+
+    assert_enqueued_emails 1 do
+      assert settlement.schedule_email_delivery
+    end
+    assert_not_nil settlement.reload.email_sent_at
+
+    payment = Payment.create_for_client(settlement.client)
+
+    settlement.reload
+    assert settlement.paid?
+    assert_not_nil settlement.paid_at
+    assert_equal payment, settlement.payment
+  end
+
+  test "mark_paid works on a completed settlement" do
+    settlement = create_settlement
+    settlement.complete!
+
+    settlement.mark_paid!
+
+    assert settlement.reload.paid?
+  end
+
   private
 
   def create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email: "alice@example.com"))

@@ -84,7 +84,7 @@ Errors always look like this:
 | 400    | `parameter_missing`   | Required top-level key (e.g. `settlement`) missing from the body |
 | 401    | `unauthorized`        | Missing or wrong token                                          |
 | 404    | `not_found`           | Unknown id                                                      |
-| 422    | `validation_failed`   | Record invalid (unknown `client_id`, missing `generated_at`, …) |
+| 422    | `validation_failed`   | Record invalid (unknown `client_id`, missing `generated_at`, settlement no longer a draft, …) |
 | 422    | `invalid_transition`  | State machine refused the transition (e.g. completing twice)    |
 | 503    | `api_not_configured`  | No `api.token` in the credentials                               |
 
@@ -304,9 +304,21 @@ curl -X PATCH \
 
 `200 OK` with the updated settlement.
 
+Only a `draft` settlement accepts changes to `client_id`, `monthly_report_id` or
+`generated_at`. On a `completed` or `paid` settlement the response is `422` /
+`validation_failed`, e.g.
+`"message": "Generated at can no longer be changed once the settlement is completed"`.
+
 Note: changing `generated_at` does **not** re-price existing positions — prices
 are captured when a position is created. Delete and recreate positions if the
 pricing date matters.
+
+### Positions of a completed settlement
+
+Positions can only be added, updated or deleted while the settlement is a
+`draft`. On a `completed` or `paid` settlement, all three position endpoints
+below return `422` / `validation_failed` with
+`"message": "Settlement is completed, its positions can no longer be changed"`.
 
 ### `POST /api/settlements/:id/positions`
 

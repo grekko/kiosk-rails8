@@ -8,7 +8,12 @@ class Settlement < ApplicationRecord
 
   scope :newest_first, -> { order(generated_at: :desc) }
 
+  # Data that decides what the Client owes; frozen once the Settlement leaves draft.
+  LOCKED_ATTRIBUTES = %w[generated_at client_id monthly_report_id].freeze
+  LOCKED_MESSAGE = "can no longer be changed once the settlement is completed".freeze
+
   validates :generated_at, presence: true
+  validate :locked_unless_draft, on: :update
 
   with_options on: :email_delivery do
     validates :email_sent_at, absence: true
@@ -41,6 +46,13 @@ class Settlement < ApplicationRecord
   end
 
   private
+
+  # Checks the stored state, so setting aasm_state back to draft in the same save can't unlock it.
+  def locked_unless_draft
+    return if aasm_state_in_database == "draft"
+
+    (changed & LOCKED_ATTRIBUTES).each { |attribute| errors.add(attribute, LOCKED_MESSAGE) }
+  end
 
   def client_must_have_email
     return true if client.email.present?

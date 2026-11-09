@@ -77,7 +77,7 @@ module KioskApi
       post("settlements", settlement: body).fetch("settlement")
     end
 
-    # Updatable: client_id, monthly_report_id, generated_at, paid_at
+    # Updatable: paid_at; client_id, monthly_report_id, generated_at only while draft
     def update_settlement(id, **attributes)
       patch("settlements/#{id}", settlement: attributes).fetch("settlement")
     end
