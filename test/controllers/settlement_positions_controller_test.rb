@@ -37,7 +37,6 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create without an amount does not save" do
-    skip "BUG: invalid create renders settlements/edit from this controller, so its `render \"form\"` picks settlement_positions/_form without a position local and raises instead of answering 422"
     settlement = create_settlement
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
 
@@ -49,7 +48,6 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "edit renders the position form" do
-    skip "BUG: settlement_positions/edit renders the form partial without the settlement local it reads"
     settlement = create_settlement
     position = create_position(settlement)
 
@@ -69,7 +67,6 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update without an amount does not save" do
-    skip "BUG: invalid update renders settlement_positions/edit, which renders the form partial without the settlement local it reads"
     settlement = create_settlement
     position = create_position(settlement, amount: 2)
 
