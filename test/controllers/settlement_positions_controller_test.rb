@@ -87,19 +87,47 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_settlement_path(settlement)
   end
 
-  # Open question: only the form's disabled fieldset protects a completed Settlement;
-  # the controller still adds the position and so changes the Outstanding Balance.
-  test "create still adds a position to a completed settlement" do
+  test "create refuses to add a position to a completed settlement" do
     settlement = create_settlement
     settlement.complete!
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
 
-    assert_difference -> { settlement.positions.count }, 1 do
+    assert_no_difference -> { settlement.positions.count } do
       post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 1 } }, headers: AUTH
     end
+
+    assert_refused
+  end
+
+  test "update refuses to change a position of a completed settlement" do
+    settlement = create_settlement
+    position = create_position(settlement, amount: 2)
+    settlement.complete!
+
+    patch settlement_position_path(settlement, position), params: { settlement_position: { amount: 5 } }, headers: AUTH
+
+    assert_refused
+    assert_equal 2, position.reload.amount
+  end
+
+  test "destroy refuses to remove a position of a completed settlement" do
+    settlement = create_settlement
+    position = create_position(settlement)
+    settlement.complete!
+
+    assert_no_difference -> { SettlementPosition.count } do
+      delete settlement_position_path(settlement, position), headers: AUTH
+    end
+
+    assert_refused
   end
 
   private
+
+  def assert_refused
+    assert_response :unprocessable_entity
+    assert_includes response.body, SettlementPosition::LOCKED_MESSAGE
+  end
 
   def create_settlement(generated_at: Date.new(2026, 1, 31))
     Settlement.create!(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}"), monthly_report: MonthlyReport.create!(title: "Januar 2026"), generated_at:)

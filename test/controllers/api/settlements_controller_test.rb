@@ -100,6 +100,21 @@ class Api::SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_equal Date.new(2026, 2, 28), settlement.reload.generated_at
   end
 
+  test "update refuses to change a completed settlement" do
+    settlement = create_settlement
+    settlement.complete!
+
+    with_api_token do
+      patch api_settlement_path(settlement), params: { settlement: { generated_at: "2026-02-28" } },
+                                             headers: api_headers, as: :json
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "validation_failed", response.parsed_body["error"]
+    assert_includes response.parsed_body["message"], Settlement::LOCKED_MESSAGE
+    assert_not_equal Date.new(2026, 2, 28), settlement.reload.generated_at
+  end
+
   test "show returns a single settlement and unknown ids return a 404" do
     settlement = create_settlement
 

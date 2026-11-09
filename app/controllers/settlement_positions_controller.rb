@@ -7,7 +7,7 @@ class SettlementPositionsController < ApplicationController
     if @position.save
       redirect_to edit_settlement_path(@settlement)
     else
-      render "settlements/edit", status: :unprocessable_entity
+      render_refused "settlements/edit"
     end
   end
 
@@ -18,17 +18,28 @@ class SettlementPositionsController < ApplicationController
     if @position.update(position_params)
       redirect_to edit_settlement_path(@settlement)
     else
-      render :edit, status: :unprocessable_entity
+      render_refused :edit
     end
   end
 
   def destroy
     position = @settlement.positions.find(params[:id])
-    position.destroy!
-    redirect_to edit_settlement_path(@settlement)
+    if position.destroy
+      redirect_to edit_settlement_path(@settlement)
+    else
+      @position = position
+      render_refused "settlements/edit"
+    end
   end
 
   private
+
+  # The position form is hidden or disabled on a completed Settlement, so its
+  # inline errors may not show; the flash carries the message instead.
+  def render_refused(template)
+    flash.now[:alert] = @position.errors.full_messages.to_sentence
+    render template, status: :unprocessable_entity
+  end
 
   def set_settlement
     @settlement = Settlement.find(params[:settlement_id])

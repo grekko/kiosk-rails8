@@ -61,4 +61,32 @@ class Api::SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert position.reload.persisted?
   end
+
+  test "create, update and destroy are refused on a completed settlement" do
+    position = @settlement.positions.create!(drink: @drink, amount: 1)
+    @settlement.complete!
+
+    with_api_token do
+      post api_settlement_positions_path(@settlement), params: { position: { drink_id: @drink.id, amount: 2 } },
+                                                      headers: api_headers, as: :json
+      assert_refused
+
+      patch api_settlement_position_path(@settlement, position), params: { position: { amount: 5 } },
+                                                                 headers: api_headers, as: :json
+      assert_refused
+
+      delete api_settlement_position_path(@settlement, position), headers: api_headers
+      assert_refused
+    end
+
+    assert_equal [ 1 ], @settlement.positions.reload.map(&:amount)
+  end
+
+  private
+
+  def assert_refused
+    assert_response :unprocessable_entity
+    assert_equal "validation_failed", response.parsed_body["error"]
+    assert_equal SettlementPosition::LOCKED_MESSAGE, response.parsed_body["message"]
+  end
 end

@@ -40,4 +40,15 @@ class SettlementPositionTest < ActiveSupport::TestCase
 
     assert_equal 180, position.price_in_cents
   end
+
+  test "a completed settlement refuses new, changed and removed positions" do
+    position = @settlement.positions.create!(drink: @drink, amount: 2)
+    @settlement.complete!
+
+    assert_not @settlement.positions.build(drink: @drink, amount: 1).save
+    assert_not position.update(amount: 5)
+    assert_includes position.errors[:base], SettlementPosition::LOCKED_MESSAGE
+    assert_not position.destroy
+    assert_equal 2, position.reload.amount
+  end
 end

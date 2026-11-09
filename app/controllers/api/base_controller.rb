@@ -11,6 +11,7 @@ class Api::BaseController < ActionController::API
 
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActiveRecord::RecordInvalid, with: :render_record_invalid
+  rescue_from ActiveRecord::RecordNotDestroyed, with: :render_record_invalid
   rescue_from ActionController::ParameterMissing, with: :render_parameter_missing
   rescue_from AASM::InvalidTransition, with: :render_invalid_transition
 

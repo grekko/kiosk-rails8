@@ -29,7 +29,7 @@ The Client's own page (German: "Konto"), reached through a private link without 
 One month's tally, titled like "Januar 2026", with the inventory sheet ("Inventur") attached as an image or PDF. It is either draft or completed; completing is a manual marker that can be undone.
 
 **Settlement**:
-What one Client owes for one Monthly Report (German: "Abrechnung"). States: **draft** (being edited), **completed** (final, counts toward the Client's Outstanding Balance), **paid** (covered by a Payment).
+What one Client owes for one Monthly Report (German: "Abrechnung"). States: **draft** (being edited), **completed** (final, counts toward the Client's Outstanding Balance), **paid** (covered by a Payment). Only a draft can be edited: once completed, a Settlement's date, Client, Monthly Report and positions can no longer be changed; sending its email and linking it to a Payment still work.
 _Avoid_: Invoice (that word is taken by an Order's attachment)
 
 **Settlement Position**:
