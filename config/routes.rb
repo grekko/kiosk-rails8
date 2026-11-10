@@ -29,6 +29,7 @@ Rails.application.routes.draw do
     resources :settlements, only: %i[index show create update] do
       member do
         post :complete
+        post :reopen
         post :send_email
       end
 
@@ -58,6 +59,7 @@ Rails.application.routes.draw do
 
     member do
       patch :complete
+      patch :reopen
       patch :schedule_email
     end
 

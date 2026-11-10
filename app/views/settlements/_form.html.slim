@@ -33,6 +33,9 @@
 - if settlement.persisted? && settlement.draft?
   = button_to "Complete Settlement", complete_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }
 
+- if settlement.persisted? && settlement.may_reopen?
+  = button_to "Back to draft", reopen_settlement_path(settlement), method: :patch, class: "secondary"
+
 - if settlement.persisted?
   .settlement-form
     - if settlement.draft?

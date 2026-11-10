@@ -10,6 +10,7 @@ require "uri"
 #                                         generated_at: "2026-01-31",
 #                                         positions: [ { drink_id: 7, amount: 3 } ])
 #   client.complete_settlement(settlement["id"])
+#   client.reopen_settlement(settlement["id"])
 #   client.send_settlement_email(settlement["id"])
 #
 # The token comes from ENV["API_TOKEN"], the host from ENV["KIOSK_API_URL"]
@@ -84,6 +85,10 @@ module KioskApi
 
     def complete_settlement(id)
       post("settlements/#{id}/complete").fetch("settlement")
+    end
+
+    def reopen_settlement(id)
+      post("settlements/#{id}/reopen").fetch("settlement")
     end
 
     def send_settlement_email(id)

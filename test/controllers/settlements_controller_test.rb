@@ -108,6 +108,49 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil settlement.completed_at
   end
 
+  test "edit offers Back to draft for a completed settlement" do
+    settlement = create_settlement
+    settlement.complete!
+
+    get edit_settlement_path(settlement), headers: AUTH
+
+    assert_select "form[action=?] button", reopen_settlement_path(settlement), text: "Back to draft"
+  end
+
+  test "edit hides Back to draft once the email was sent" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.update!(email_sent_at: Time.current)
+
+    get edit_settlement_path(settlement), headers: AUTH
+
+    assert_select "form[action=?]", reopen_settlement_path(settlement), count: 0
+  end
+
+  test "reopen moves a completed settlement back to draft" do
+    settlement = create_settlement
+    settlement.complete!
+
+    patch reopen_settlement_path(settlement), headers: AUTH
+
+    assert_redirected_to edit_settlement_path(settlement)
+    assert_equal "Settlement moved back to draft.", flash[:notice]
+    assert settlement.reload.draft?
+    assert_nil settlement.completed_at
+  end
+
+  test "reopen refuses an emailed settlement" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.update!(email_sent_at: Time.current)
+
+    patch reopen_settlement_path(settlement), headers: AUTH
+
+    assert_redirected_to edit_settlement_path(settlement)
+    assert_equal "A paid or emailed settlement can't be moved back to draft.", flash[:alert]
+    assert settlement.reload.completed?
+  end
+
   test "schedule_email enqueues the settlement email when the client has an email" do
     settlement = create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email: "alice@example.com"))
 

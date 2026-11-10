@@ -32,6 +32,11 @@ class Settlement < ApplicationRecord
     event :mark_paid do
       transitions from: :completed, to: :paid, after: :set_paid_at
     end
+
+    # Undoes a mistaken completion, but only before the Client saw the amount (email) or paid it.
+    event :reopen do
+      transitions from: :completed, to: :draft, guard: :email_not_sent?, after: :clear_completed_at
+    end
   end
 
   def price_in_cents
@@ -62,6 +67,14 @@ class Settlement < ApplicationRecord
 
   def set_completed_at
     self.completed_at ||= Time.current
+  end
+
+  def email_not_sent?
+    email_sent_at.blank?
+  end
+
+  def clear_completed_at
+    self.completed_at = nil
   end
 
   def set_paid_at

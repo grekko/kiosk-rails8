@@ -2,7 +2,8 @@
 
 An internal, read/write JSON API for clients and settlements. It exposes the
 whole settlement workflow: look up clients, create a settlement with its
-positions, edit it, complete it, and send the settlement email.
+positions, edit it, complete it (or reopen it to fix a mistake), and send the
+settlement email.
 
 Everything lives under `/api` and speaks JSON only — no HTML, no cookies, no
 CSRF token.
@@ -370,6 +371,24 @@ curl -X POST -H "Authorization: Bearer $KIOSK_API_TOKEN" \
 `200 OK` with the settlement. Calling it on a settlement that is not `draft`
 returns `422` / `invalid_transition`.
 
+### `POST /api/settlements/:id/reopen`
+
+Moves a `completed` settlement back to `draft` and clears `completed_at`, so a
+mistake can be fixed. Completing it again stamps a fresh `completed_at`.
+
+```bash
+curl -X POST -H "Authorization: Bearer $KIOSK_API_TOKEN" \
+     https://kiosk.example.com/api/settlements/42/reopen
+```
+
+`200 OK` with the settlement. It is refused with `422` / `invalid_transition`
+once the client has seen or paid the amount:
+
+- paid: `"Event 'reopen' cannot transition from 'paid'."`
+- email sent: `"Event 'reopen' cannot transition from 'completed'. Failed callback(s): [:email_not_sent?]."`
+
+A `draft` settlement is refused the same way (`… from 'draft'.`).
+
 ### `POST /api/settlements/:id/send_email`
 
 Enqueues the settlement email to the client and stamps `email_sent_at`.
@@ -460,6 +479,7 @@ client.add_position(settlement["id"], drink_id: 9, amount: 1)
 client.update_position(settlement["id"], position_id, amount: 2)
 client.delete_position(settlement["id"], position_id)
 client.complete_settlement(settlement["id"])
+client.reopen_settlement(settlement["id"])
 client.send_settlement_email(settlement["id"])
 ```
 
@@ -489,6 +509,7 @@ script/api add-position 42 --drink-id 9 --amount 1
 script/api update-position 42 91 --amount 2
 script/api delete-position 42 91
 script/api complete 42
+script/api reopen 42
 script/api send-email 42
 ```
 
