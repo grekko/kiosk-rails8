@@ -165,12 +165,14 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
 
   test "schedule_email sends nothing when the client has no email" do
     settlement = create_settlement
+    settlement.complete!
 
     assert_no_enqueued_emails do
       patch schedule_email_settlement_path(settlement), headers: AUTH
     end
 
     assert_redirected_to settlements_path
+    assert_equal "Client must have an email address", flash[:alert]
     assert_nil settlement.reload.email_sent_at
   end
 

@@ -40,10 +40,12 @@ class SettlementTest < ActiveSupport::TestCase
 
   test "schedule_email_delivery returns false when the client has no email" do
     settlement = create_settlement(client: Client.create!(name: "No Mail-#{SecureRandom.hex(4)}"))
+    settlement.complete!
 
     assert_no_enqueued_emails do
       assert_equal false, settlement.schedule_email_delivery
     end
+    assert_equal [ "Client must have an email address" ], settlement.errors[:base]
     assert_nil settlement.reload.email_sent_at
   end
 
