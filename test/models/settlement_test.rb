@@ -47,9 +47,31 @@ class SettlementTest < ActiveSupport::TestCase
     assert_nil settlement.reload.email_sent_at
   end
 
+  test "schedule_email_delivery refuses a draft" do
+    settlement = create_settlement
+
+    assert_no_enqueued_emails do
+      assert_equal false, settlement.schedule_email_delivery
+    end
+    assert_includes settlement.errors[:base], "Only a completed or paid settlement can be emailed"
+    assert_nil settlement.reload.email_sent_at
+  end
+
+  test "schedule_email_delivery works for a paid settlement" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.mark_paid!
+
+    assert_enqueued_emails 1 do
+      assert settlement.schedule_email_delivery
+    end
+    assert_not_nil settlement.reload.email_sent_at
+  end
+
   test "schedule_email_delivery returns false when the email was already sent" do
     sent_at = 1.day.ago.change(usec: 0)
     settlement = create_settlement
+    settlement.complete!
     settlement.update!(email_sent_at: sent_at)
 
     assert_no_enqueued_emails do
@@ -60,6 +82,7 @@ class SettlementTest < ActiveSupport::TestCase
 
   test "schedule_email_delivery enqueues the completed mail and sets email_sent_at" do
     settlement = create_settlement
+    settlement.complete!
 
     freeze_time do
       assert_enqueued_email_with SettlementMailer, :completed_mail, params: { settlement: } do

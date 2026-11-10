@@ -39,7 +39,7 @@ One line of a Settlement: a Drink and an amount, priced from the Drink's price o
 A dated selling price for a Drink, valid from a given day until a newer one starts; it can be deactivated (UI: "Prices").
 
 **Settlement Email**:
-The email that tells a Client their Settlement is ready, subject "Comuna Kühlschrank Abrechnung [<report title>]". It is sent at most once per Settlement.
+The email that tells a Client their Settlement is ready, subject "Comuna Kühlschrank Abrechnung [<report title>]". It is sent at most once per Settlement, and only once the Settlement is completed or paid, never while it is a draft.
 
 **Settlement Tracking**:
 The link in the Settlement Email. The first click records when the Client opened it, notifies the kiosk ("Kiosk Mail [<report title>] geöffnet von <name>"), and forwards to the Client Page.

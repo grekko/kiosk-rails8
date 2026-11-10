@@ -60,6 +60,8 @@ class SettlementsController < ApplicationController
   def schedule_email
     if @settlement.schedule_email_delivery
       flash[:notice] = "Email sent."
+    else
+      flash[:alert] = @settlement.errors.full_messages.to_sentence
     end
 
     redirect_back_or_to settlements_path
