@@ -213,6 +213,7 @@ class Api::SettlementsControllerTest < ActionDispatch::IntegrationTest
 
   test "send_email delivers the settlement mail once" do
     settlement = create_settlement
+    settlement.complete!
 
     assert_enqueued_emails 1 do
       with_api_token do
@@ -237,6 +238,7 @@ class Api::SettlementsControllerTest < ActionDispatch::IntegrationTest
   test "send_email fails for a client without an email address" do
     client = Client.create!(name: "No Mail-#{SecureRandom.hex(4)}")
     settlement = Settlement.create!(client: client, monthly_report: @report, generated_at: Date.current)
+    settlement.complete!
 
     assert_no_enqueued_emails do
       with_api_token do
@@ -246,6 +248,21 @@ class Api::SettlementsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_includes response.parsed_body["message"], "Client must have an email address"
+  end
+
+  test "send_email refuses a draft" do
+    settlement = create_settlement
+
+    assert_no_enqueued_emails do
+      with_api_token do
+        post send_email_api_settlement_path(settlement), headers: api_headers
+      end
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "validation_failed", response.parsed_body["error"]
+    assert_includes response.parsed_body["message"], "Only a completed or paid settlement can be emailed"
+    assert_nil settlement.reload.email_sent_at
   end
 
   private

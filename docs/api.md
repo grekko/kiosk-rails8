@@ -404,12 +404,14 @@ curl -X POST -H "Authorization: Bearer $KIOSK_API_TOKEN" \
 
 Returns `422` / `validation_failed` when
 
+- the settlement is still a draft (`"Only a completed or paid settlement can be emailed"`),
 - the client has no email address (`"Client must have an email address"`), or
 - the mail was already sent (`"Email sent at must be blank"`).
 
-The second rule makes this endpoint safe against accidental double sends: a
-retry never mails the client twice. Sending is possible in any state, but the
-usual order is complete first, then send.
+Complete the settlement first, then send: a draft may still change and is not
+shown on the client's page, so its email would link to nothing. The
+already-sent rule makes this endpoint safe against accidental double sends: a
+retry never mails the client twice.
 
 `email_first_opened_at` is filled in later, when the client opens the mail.
 

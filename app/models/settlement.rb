@@ -20,6 +20,7 @@ class Settlement < ApplicationRecord
   with_options on: :email_delivery do
     validates :email_sent_at, absence: true
     validate :client_must_have_email
+    validate :must_not_be_draft
   end
 
   aasm do
@@ -65,6 +66,11 @@ class Settlement < ApplicationRecord
     return true if client.email.present?
 
     errors.add(:base, "Client must have an email address")
+  end
+
+  # A draft may still change and is hidden from the Client Page, so its email would link to nothing.
+  def must_not_be_draft
+    errors.add(:base, "Only a completed or paid settlement can be emailed") if draft?
   end
 
   def set_completed_at

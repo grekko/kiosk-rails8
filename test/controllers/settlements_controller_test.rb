@@ -153,6 +153,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
 
   test "schedule_email enqueues the settlement email when the client has an email" do
     settlement = create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email: "alice@example.com"))
+    settlement.complete!
 
     assert_enqueued_emails 1 do
       patch schedule_email_settlement_path(settlement), headers: AUTH
@@ -164,12 +165,26 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
 
   test "schedule_email sends nothing when the client has no email" do
     settlement = create_settlement
+    settlement.complete!
 
     assert_no_enqueued_emails do
       patch schedule_email_settlement_path(settlement), headers: AUTH
     end
 
     assert_redirected_to settlements_path
+    assert_equal "Client must have an email address", flash[:alert]
+    assert_nil settlement.reload.email_sent_at
+  end
+
+  test "schedule_email refuses a draft" do
+    settlement = create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email: "alice@example.com"))
+
+    assert_no_enqueued_emails do
+      patch schedule_email_settlement_path(settlement), headers: AUTH
+    end
+
+    assert_redirected_to settlements_path
+    assert_includes flash[:alert], "Only a completed or paid settlement can be emailed"
     assert_nil settlement.reload.email_sent_at
   end
 
