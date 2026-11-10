@@ -23,7 +23,7 @@ A person who takes drinks from the kiosk and gets billed. A Client can be suspen
 _Avoid_: confusing it with `KioskApi::Client`, the API wrapper
 
 **Client Page**:
-The Client's own page (German: "Konto"), reached through a private link without a login, showing their Outstanding Balance, their Settlements ("Abrechnungen") and how to pay.
+The Client's own page (German: "Konto"), reached through a private link without a login, showing their Outstanding Balance, their completed and paid Settlements ("Abrechnungen"; drafts stay hidden) and how to pay.
 
 **Monthly Report**:
 One month's tally, titled like "Januar 2026", with the inventory sheet ("Inventur") attached as an image or PDF. It is either draft or completed; completing is a manual marker that can be undone.
