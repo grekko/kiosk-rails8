@@ -31,6 +31,24 @@ class External::ClientControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, rounded_url
   end
 
+  test "lists completed and paid settlements but hides drafts" do
+    client = Client.create!(name: "Carol")
+    draft, completed, paid = %w[Draftmonat Fertigmonat Bezahltmonat].map do |title|
+      Settlement.create!(client: client, monthly_report: MonthlyReport.create!(title: title), generated_at: Date.current)
+    end
+    completed.complete!
+    paid.complete!
+    paid.mark_paid!
+
+    get external_client_path(client.access_uuid)
+
+    assert_response :success
+    assert_select "#settlements tbody tr", count: 2
+    assert_select "#settlements", text: /Fertigmonat/
+    assert_select "#settlements", text: /Bezahltmonat/
+    assert_not_includes @response.body, draft.monthly_report.title
+  end
+
   test "does not show payment options when outstanding amount is zero" do
     client = Client.create!(name: "Bob")
 

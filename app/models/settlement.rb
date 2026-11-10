@@ -7,6 +7,8 @@ class Settlement < ApplicationRecord
   has_many :positions, class_name: "SettlementPosition", dependent: :destroy
 
   scope :newest_first, -> { order(generated_at: :desc) }
+  # Drafts may still change or be reopened, so the Client Page never shows them.
+  scope :visible_to_client, -> { where(aasm_state: %w[completed paid]) }
 
   # Data that decides what the Client owes; frozen once the Settlement leaves draft.
   LOCKED_ATTRIBUTES = %w[generated_at client_id monthly_report_id].freeze

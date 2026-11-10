@@ -113,7 +113,7 @@ h2 Abrechnungen
       th Drinks
       th Paid?
     tbody
-      - @client.settlements.each do |settlement|
+      - @client.settlements.visible_to_client.each do |settlement|
         tr
           td= link_to settlement.monthly_report.title, external_client_monthly_report_url(@client.access_uuid, settlement.monthly_report)
           td.amount= formatted_price(settlement.price_in_cents)
