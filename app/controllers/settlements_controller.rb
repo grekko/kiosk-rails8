@@ -2,12 +2,12 @@ class SettlementsController < ApplicationController
   before_action :set_settlement, only: %i[ edit update destroy complete reopen schedule_email ]
 
   def index
-    @settlements = Settlement.includes(:client, :monthly_report).newest_first
+    @settlements = Settlement.includes(:client, :monthly_report, :positions).newest_first
   end
 
   def filtered
     @client = Client.find(params[:client_id])
-    @settlements = Settlement.where(client: @client).includes(:client, :monthly_report).newest_first
+    @settlements = Settlement.where(client: @client).includes(:client, :monthly_report, :positions).newest_first
   end
 
   def new

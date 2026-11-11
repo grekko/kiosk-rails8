@@ -18,7 +18,7 @@ h1 Clients
       - @clients.each do |client|
         ruby:
           outstanding = client.outstanding_payment_sum_in_cents
-          paid = client.settlements.paid.sum(&:price_in_cents)
+          paid = client.settlements.paid.includes(:positions).sum(&:price_in_cents)
           settlements_total[:outstanding] += outstanding
           settlements_total[:paid] += paid
         tr class="#{client.suspended? ? 'text-muted' : ''}"
