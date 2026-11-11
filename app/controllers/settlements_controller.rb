@@ -1,13 +1,15 @@
 class SettlementsController < ApplicationController
-  before_action :set_settlement, only: %i[ edit update destroy complete reopen schedule_email ]
+  before_action :set_settlement, only: %i[ edit update destroy complete reopen schedule_email retry_email ]
 
   def index
     @settlements = Settlement.includes(:client, :monthly_report, :positions).newest_first
+    @failed_emails = Settlement.failed_email_executions
   end
 
   def filtered
     @client = Client.find(params[:client_id])
     @settlements = Settlement.where(client: @client).includes(:client, :monthly_report, :positions).newest_first
+    @failed_emails = Settlement.failed_email_executions
   end
 
   def new
@@ -62,6 +64,16 @@ class SettlementsController < ApplicationController
       flash[:notice] = "Email sent."
     else
       flash[:alert] = @settlement.errors.full_messages.to_sentence
+    end
+
+    redirect_back_or_to settlements_path
+  end
+
+  def retry_email
+    if @settlement.retry_failed_email
+      flash[:notice] = "Email queued again."
+    else
+      flash[:alert] = "There is no failed email to retry."
     end
 
     redirect_back_or_to settlements_path

@@ -61,6 +61,7 @@ Rails.application.routes.draw do
       patch :complete
       patch :reopen
       patch :schedule_email
+      patch :retry_email
     end
 
     resources :positions, controller: "settlement_positions", only: %i[create edit update destroy]

@@ -1,4 +1,4 @@
 h1 Settlements
 
 = link_to "New settlement", new_settlement_path
-= render "table", settlements: @settlements
+= render "table", settlements: @settlements, failed_emails: @failed_emails
