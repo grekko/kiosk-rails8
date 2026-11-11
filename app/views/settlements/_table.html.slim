@@ -23,6 +23,7 @@
                           class: "secondary",
                           data: { turbo_confirm: "Send emails to all settlements in #{monthly_report.title}?" }
         - settlements.each do |settlement|
+          - failed_email = failed_emails[settlement.id]
           tr
             td
               = link_to settlement.client.name, edit_client_path(settlement.client)
@@ -31,14 +32,14 @@
             td.amount= link_to formatted_price(settlement.price_in_cents), edit_settlement_path(settlement)
             td
               = settlement_status_emoji(settlement)
-              - if failed_emails.key?(settlement.id)
+              - if failed_email
                 span title="Email failed" ⚠️
             td= formatted_date(settlement.generated_at)
             td= formatted_date(settlement.completed_at)
             td= formatted_date(settlement.paid_at)
             td
               = formatted_date(settlement.email_sent_at)
-              - if (failed_email = failed_emails[settlement.id])
+              - if failed_email
                 br
                 strong.email-failed title=failed_email.message ⚠️ Email failed (#{failed_email.exception_class})
             td= formatted_datetime(settlement.email_first_opened_at)
@@ -46,7 +47,7 @@
               - if settlement.draft?
                 = button_to "Delete", settlement_path(settlement), method: :delete, data: { turbo_confirm: "Sure?" }
               - else
-                - if failed_emails.key?(settlement.id)
+                - if failed_email
                   = button_to "Retry email", retry_email_settlement_path(settlement), method: :patch
                 - elsif settlement.valid?(:email_delivery)
                   = button_to "Send Mail", schedule_email_settlement_path(settlement), method: :patch, data: { turbo_confirm: "Sure?" }

@@ -2,6 +2,7 @@ require "test_helper"
 
 class SettlementTest < ActiveSupport::TestCase
   include ActionMailer::TestHelper
+  include SolidQueueHelpers
 
   test "complete moves a draft to completed and sets completed_at" do
     settlement = create_settlement
@@ -263,6 +264,23 @@ class SettlementTest < ActiveSupport::TestCase
     settlement.reload
     assert settlement.completed?
     assert_not_nil settlement.completed_at
+  end
+
+  test "retry_failed_email returns false when a concurrent retry removed the failed execution" do
+    load_solid_queue_tables
+    settlement = create_settlement
+    settlement.complete!
+    fail_settlement_email(settlement)
+
+    original = Settlement.method(:failed_email_executions)
+    # Another tap retries the same failed job between this lookup and its retry, so with_lock's reload finds no row.
+    Settlement.define_singleton_method(:failed_email_executions) do
+      original.call.each_value { |execution| SolidQueue::FailedExecution.where(id: execution.id).delete_all }
+    end
+
+    assert_equal false, settlement.retry_failed_email
+  ensure
+    Settlement.define_singleton_method(:failed_email_executions, original) if original
   end
 
   private

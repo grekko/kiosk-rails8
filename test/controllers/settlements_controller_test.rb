@@ -246,9 +246,6 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to settlements_path
   end
 
-  private
-
-  # Completed, with positions and a Client email, so its row also checks whether it can be emailed.
   test "index marks a settlement whose email failed and offers a retry instead of a send" do
     load_solid_queue_tables
     failed = create_sendable_settlement
@@ -312,6 +309,9 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "There is no failed email to retry.", flash[:alert]
   end
 
+  private
+
+  # Completed, with positions and a Client email, so its row also checks whether it can be emailed.
   def create_sendable_settlement
     name = "Alice-#{SecureRandom.hex(4)}"
     settlement = create_settlement(client: Client.create!(name:, email: "#{name}@example.com"))
