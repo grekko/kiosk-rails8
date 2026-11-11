@@ -1,7 +1,21 @@
 require "test_helper"
 
 class ClientsControllerTest < ActionDispatch::IntegrationTest
+  include QueryCountHelpers
+
   AUTH = BasicAuthHelpers::HEADERS
+
+  test "index runs the same number of queries for more settlements per client" do
+    clients = [ create_client, create_client ]
+    clients.each { |client| add_settlements(client, 1) }
+    few = count_queries { get clients_path, headers: AUTH }
+
+    clients.each { |client| add_settlements(client, 3) }
+    many = count_queries { get clients_path, headers: AUTH }
+
+    assert_response :success
+    assert_equal few, many
+  end
 
   test "index lists clients" do
     client = create_client
@@ -131,6 +145,19 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  # One completed (outstanding) and one paid Settlement each time, both with a position.
+  def add_settlements(client, count)
+    drink = Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150)
+    count.times do
+      [ false, true ].each do |paid|
+        settlement = Settlement.create!(client:, monthly_report: MonthlyReport.create!(title: "January"), generated_at: Date.current)
+        settlement.positions.create!(drink:, amount: 2)
+        settlement.complete!
+        settlement.mark_paid! if paid
+      end
+    end
+  end
 
   def create_client(email: nil)
     Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email:)

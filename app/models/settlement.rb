@@ -43,18 +43,39 @@ class Settlement < ApplicationRecord
   end
 
   def price_in_cents
-    positions.loaded? ? positions.sum(&:price_in_cents) : positions.sum(:price_in_cents)
+    positions.sum(&:price_in_cents)
   end
 
-  # Records the send before enqueueing, so a failed save can't lead to a second mail on retry.
+  # Claims the send with one conditional UPDATE before enqueueing, so of two concurrent sends
+  # (a double click, the batch beside a manual send) only one enqueues. with_lock doesn't lock rows on SQLite.
   def schedule_email_delivery
-    return false unless valid?(:email_delivery) && update(email_sent_at: Time.current)
+    return false unless valid?(:email_delivery) && valid?(:update)
 
-    SettlementMailer.with(settlement: self).completed_mail.deliver_later
-    true
+    now = Time.current
+    unless Settlement.where(id:, email_sent_at: nil).update_all(email_sent_at: now, updated_at: now) == 1
+      errors.add(:base, "Email was already sent")
+      return false
+    end
+    self.email_sent_at = now
+    self.updated_at = now
+    clear_attribute_changes(%i[email_sent_at updated_at])
+
+    return true if enqueue_completed_mail
+
+    # Nothing was queued, so release the claim: the Settlement stays sendable.
+    update_column(:email_sent_at, nil)
+    errors.add(:base, "Email could not be queued, please try again")
+    false
   end
 
   private
+
+  # deliver_later returns false when the adapter raises ActiveJob::EnqueueError; some adapters raise past it.
+  def enqueue_completed_mail
+    SettlementMailer.with(settlement: self).completed_mail.deliver_later
+  rescue ActiveJob::EnqueueError
+    false
+  end
 
   # Checks the stored state, so setting aasm_state back to draft in the same save can't unlock it.
   def locked_unless_draft

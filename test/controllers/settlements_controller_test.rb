@@ -2,8 +2,20 @@ require "test_helper"
 
 class SettlementsControllerTest < ActionDispatch::IntegrationTest
   include ActionMailer::TestHelper
+  include QueryCountHelpers
 
   AUTH = BasicAuthHelpers::HEADERS
+
+  test "index runs the same number of queries for more settlements" do
+    create_sendable_settlement
+    few = count_queries { get settlements_path, headers: AUTH }
+
+    3.times { create_sendable_settlement }
+    many = count_queries { get settlements_path, headers: AUTH }
+
+    assert_response :success
+    assert_equal few, many
+  end
 
   test "index lists settlements" do
     settlement = create_settlement
@@ -234,6 +246,15 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  # Completed, with positions and a Client email, so its row also checks whether it can be emailed.
+  def create_sendable_settlement
+    name = "Alice-#{SecureRandom.hex(4)}"
+    settlement = create_settlement(client: Client.create!(name:, email: "#{name}@example.com"))
+    settlement.positions.create!(drink: Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150), amount: 2)
+    settlement.complete!
+    settlement
+  end
 
   def create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}"))
     Settlement.create!(client:, monthly_report: MonthlyReport.create!(title: "Januar 2026"), generated_at: Date.new(2026, 1, 31))

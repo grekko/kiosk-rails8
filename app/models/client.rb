@@ -28,6 +28,10 @@ class Client < ApplicationRecord
     settlements.includes(:positions).completed.sum(&:price_in_cents)
   end
 
+  def paid_sum_in_cents
+    settlements.includes(:positions).paid.sum(&:price_in_cents)
+  end
+
   private
 
   def set_access_uuid
