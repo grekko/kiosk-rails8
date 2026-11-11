@@ -3,7 +3,6 @@ require "test_helper"
 class ClientsControllerTest < ActionDispatch::IntegrationTest
   include QueryCountHelpers
 
-
   test "index runs the same number of queries for more settlements per client" do
     clients = [ create_client, create_client ]
     clients.each { |client| add_settlements(client, 1) }

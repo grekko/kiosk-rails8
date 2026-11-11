@@ -5,7 +5,6 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   include QueryCountHelpers
   include SolidQueueHelpers
 
-
   test "index runs the same number of queries for more settlements" do
     create_sendable_settlement
     few = count_queries { get settlements_path }
