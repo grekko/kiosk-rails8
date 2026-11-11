@@ -17,7 +17,7 @@ In development, mail is written to `tmp/mails/` instead of being sent, and Sentr
 ## Run locally
 
 ```bash
-bin/setup   # first time: install deps, prepare DB
+bin/setup   # first time: install deps, prepare DB (a new development DB gets made-up example data from db/seeds.rb; add it to an existing one with bin/rails db:seed)
 bin/dev     # start the server (Puma) at http://localhost:3050
 ```
 
