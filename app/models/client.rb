@@ -24,11 +24,14 @@ class Client < ApplicationRecord
     update(suspended_at: nil)
   end
 
-  def outstanding_payment_sum_in_cents
-    settlements.includes(:positions).completed.sum(&:price_in_cents)
-  end
+  def outstanding_payment_sum_in_cents = settlements_sum_in_cents(:completed)
+  def paid_sum_in_cents = settlements_sum_in_cents(:paid)
 
   private
+
+  def settlements_sum_in_cents(state)
+    settlements.includes(:positions).where(aasm_state: state).sum(&:price_in_cents)
+  end
 
   def set_access_uuid
     self.access_uuid = SecureRandom.uuid

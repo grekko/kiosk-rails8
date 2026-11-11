@@ -2,7 +2,7 @@ h1 Hallo #{@client.name} 🎉
 
 ruby:
   generous_bonus_in_cents = 100
-  outstanding_in_cents = @client.outstanding_payment_sum_in_cents
+  outstanding_in_cents = @settlements.select(&:completed?).sum(&:price_in_cents)
   rounded_up_in_cents = rounded_up_full_euro_in_cents(outstanding_in_cents)
   exact_generous_in_cents = outstanding_in_cents + generous_bonus_in_cents
   rounded_generous_in_cents = rounded_up_in_cents + generous_bonus_in_cents
@@ -113,7 +113,7 @@ h2 Abrechnungen
       th Drinks
       th Paid?
     tbody
-      - @client.settlements.visible_to_client.includes(:positions).each do |settlement|
+      - @settlements.each do |settlement|
         tr
           td= link_to settlement.monthly_report.title, external_client_monthly_report_url(@client.access_uuid, settlement.monthly_report)
           td.amount= formatted_price(settlement.price_in_cents)

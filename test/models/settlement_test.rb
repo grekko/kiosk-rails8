@@ -105,6 +105,46 @@ class SettlementTest < ActiveSupport::TestCase
     assert_nil settlement.reload.email_sent_at
   end
 
+  test "two copies of one settlement, loaded before either sends, enqueue exactly one mail" do
+    settlement = create_settlement
+    settlement.complete!
+    first = Settlement.find(settlement.id)
+    second = Settlement.find(settlement.id)
+
+    assert_enqueued_emails 1 do
+      assert first.schedule_email_delivery
+      assert_equal false, second.schedule_email_delivery
+    end
+    assert_equal [ "Email was already sent" ], second.errors[:base]
+  end
+
+  test "an enqueue error leaves email_sent_at nil and the settlement sendable" do
+    settlement = create_settlement
+    settlement.complete!
+
+    with_failing_enqueue do
+      assert_equal false, settlement.schedule_email_delivery
+    end
+    assert_equal [ "Email could not be queued, please try again" ], settlement.errors[:base]
+    assert_nil settlement.reload.email_sent_at
+
+    assert_enqueued_emails 1 do
+      assert settlement.schedule_email_delivery
+    end
+    assert_not_nil settlement.reload.email_sent_at
+  end
+
+  test "any other enqueue error propagates and leaves the settlement sendable" do
+    settlement = create_settlement
+    settlement.complete!
+
+    with_failing_enqueue(StandardError) do
+      assert_raises(StandardError) { settlement.schedule_email_delivery }
+    end
+    assert_nil settlement.reload.email_sent_at
+    assert settlement.valid?(:email_delivery)
+  end
+
   test "price_in_cents runs no query when the positions are preloaded" do
     settlement = create_settlement
     drink = Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150)
@@ -226,6 +266,16 @@ class SettlementTest < ActiveSupport::TestCase
   end
 
   private
+
+  # Makes the queue adapter raise error_class. Active Job turns ActiveJob::EnqueueError into a
+  # false return from deliver_later; any other error (e.g. SolidQueue::Job::EnqueueError) propagates.
+  def with_failing_enqueue(error_class = ActiveJob::EnqueueError)
+    adapter = ActionMailer::MailDeliveryJob.queue_adapter
+    adapter.define_singleton_method(:enqueue) { |*| raise error_class, "queue unavailable" }
+    yield
+  ensure
+    adapter.singleton_class.remove_method(:enqueue)
+  end
 
   def create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email: "alice@example.com"))
     Settlement.create!(client:, monthly_report: MonthlyReport.create!(title: "January"), generated_at: Date.current)
