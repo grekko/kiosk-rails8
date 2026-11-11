@@ -28,8 +28,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development" \
-    SOLID_QUEUE_IN_PUMA="1"
+    BUNDLE_WITHOUT="development"
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
