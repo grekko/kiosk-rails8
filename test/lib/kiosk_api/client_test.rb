@@ -78,6 +78,29 @@ class KioskApi::ClientTest < ActiveSupport::TestCase
     assert_equal "DELETE /api/settlements/42/positions/91 HTTP/1.1", request[:line]
   end
 
+  test "defaults to production when no url is set" do
+    client = KioskApi::Client.new(url: "", token: "x")
+
+    assert_equal "https://kiosk.grekko.de/api/", client.instance_variable_get(:@base_uri).to_s
+  end
+
+  test "a trailing slash on the url does not double the path separator" do
+    request = serve(body: { clients: [] }.to_json) do |url|
+      client("#{url}/").clients
+    end
+
+    assert_equal "GET /api/clients HTTP/1.1", request[:line]
+  end
+
+  test "update_position patches the nested position payload" do
+    request = serve(body: { position: { id: 91 } }.to_json) do |url|
+      client(url).update_position(42, 91, amount: 5)
+    end
+
+    assert_equal "PATCH /api/settlements/42/positions/91 HTTP/1.1", request[:line]
+    assert_equal({ "position" => { "amount" => 5 } }, JSON.parse(request[:body]))
+  end
+
   test "settlements leaves unset filters out of the query" do
     request = serve(body: { settlements: [] }.to_json) do |url|
       client(url).settlements(client_id: 3)
