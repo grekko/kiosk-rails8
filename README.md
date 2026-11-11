@@ -4,12 +4,12 @@ Tracks Drinks, Orders, Clients and Monthly Reports, Settlements and Payments.
 
 # Development
 
-Local settings (`RAILS_MAX_THREADS`, `WEB_CONCURRENCY`, `PORT`) live in the git-ignored `.envrc`, which direnv loads automatically.
+Local settings (`RAILS_MAX_THREADS`, `WEB_CONCURRENCY`) live in the git-ignored `.envrc`, which direnv loads automatically.
 
-Production tokens (`POSTMARK_API_TOKEN`, `SENTRY_DSN`) stay out of it, in the git-ignored `.envrc.production-secrets`, so no shell carries them by accident. Load them only for a deliberate production run, in a subshell:
+Production tokens (`POSTMARK_API_TOKEN`, `SENTRY_DSN`) stay out of it, in the Home's git-ignored `~/scm/grekko.kiosk-rails8/.envrc.production-secrets`, so no shell carries them by accident. Load them only for a deliberate production run, in a subshell:
 
 ```bash
-bash -c 'source .envrc.production-secrets && RAILS_ENV=production bin/rails …'
+bash -c 'source ~/scm/grekko.kiosk-rails8/.envrc.production-secrets && RAILS_ENV=production bin/rails …'
 ```
 
 In development, mail is written to `tmp/mails/` instead of being sent, and Sentry reports only from production.
