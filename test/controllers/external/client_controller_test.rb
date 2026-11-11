@@ -1,6 +1,21 @@
 require "test_helper"
 
 class External::ClientControllerTest < ActionDispatch::IntegrationTest
+  include QueryCountHelpers
+
+  # Each position still looks up its Drink's dated price (Drink#price_in_cents_at): one query per position.
+  # Anything beyond that would mean a lost preload.
+  test "show grows by only the per-position price lookup for more settlements" do
+    client = Client.create!(name: "Alice-#{SecureRandom.hex(4)}")
+    add_settlement(client)
+    few = count_queries { get external_client_path(client.access_uuid) }
+
+    3.times { add_settlement(client) }
+    many = count_queries { get external_client_path(client.access_uuid) }
+
+    assert_response :success
+    assert_equal few + 3, many
+  end
   test "shows exact and rounded payment options for positive outstanding amount" do
     client = Client.create!(name: "Alice")
     report = MonthlyReport.create!(title: "January")
@@ -56,5 +71,13 @@ class External::ClientControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a", text: "PayPal-Link", count: 0
+  end
+
+  private
+
+  def add_settlement(client)
+    settlement = Settlement.create!(client:, monthly_report: MonthlyReport.create!(title: "January"), generated_at: Date.current)
+    settlement.positions.create!(drink: Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150), amount: 2)
+    settlement.complete!
   end
 end

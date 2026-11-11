@@ -2,7 +2,7 @@ h1 Hallo #{@client.name} 🎉
 
 ruby:
   generous_bonus_in_cents = 100
-  outstanding_in_cents = @client.outstanding_payment_sum_in_cents
+  outstanding_in_cents = @settlements.select(&:completed?).sum(&:price_in_cents)
   rounded_up_in_cents = rounded_up_full_euro_in_cents(outstanding_in_cents)
   exact_generous_in_cents = outstanding_in_cents + generous_bonus_in_cents
   rounded_generous_in_cents = rounded_up_in_cents + generous_bonus_in_cents

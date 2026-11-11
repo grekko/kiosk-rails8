@@ -57,25 +57,22 @@ class Settlement < ApplicationRecord
       return false
     end
     self.email_sent_at = now
-    self.updated_at = now
-    clear_attribute_changes(%i[email_sent_at updated_at])
-
-    return true if enqueue_completed_mail
+    clear_attribute_change(:email_sent_at)
 
     # Nothing was queued, so release the claim: the Settlement stays sendable.
+    # Active Job turns ActiveJob::EnqueueError into a false return; other adapter errors raise.
+    begin
+      return true if SettlementMailer.with(settlement: self).completed_mail.deliver_later
+    rescue StandardError
+      update_column(:email_sent_at, nil)
+      raise
+    end
     update_column(:email_sent_at, nil)
     errors.add(:base, "Email could not be queued, please try again")
     false
   end
 
   private
-
-  # deliver_later returns false when the adapter raises ActiveJob::EnqueueError; some adapters raise past it.
-  def enqueue_completed_mail
-    SettlementMailer.with(settlement: self).completed_mail.deliver_later
-  rescue ActiveJob::EnqueueError
-    false
-  end
 
   # Checks the stored state, so setting aasm_state back to draft in the same save can't unlock it.
   def locked_unless_draft

@@ -134,6 +134,17 @@ class SettlementTest < ActiveSupport::TestCase
     assert_not_nil settlement.reload.email_sent_at
   end
 
+  test "any other enqueue error propagates and leaves the settlement sendable" do
+    settlement = create_settlement
+    settlement.complete!
+
+    with_failing_enqueue(StandardError) do
+      assert_raises(StandardError) { settlement.schedule_email_delivery }
+    end
+    assert_nil settlement.reload.email_sent_at
+    assert settlement.valid?(:email_delivery)
+  end
+
   test "price_in_cents runs no query when the positions are preloaded" do
     settlement = create_settlement
     drink = Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150)
@@ -256,10 +267,11 @@ class SettlementTest < ActiveSupport::TestCase
 
   private
 
-  # Makes the queue adapter refuse the job, the way Solid Queue does when its database write fails.
-  def with_failing_enqueue
+  # Makes the queue adapter raise error_class. Active Job turns ActiveJob::EnqueueError into a
+  # false return from deliver_later; any other error (e.g. SolidQueue::Job::EnqueueError) propagates.
+  def with_failing_enqueue(error_class = ActiveJob::EnqueueError)
     adapter = ActionMailer::MailDeliveryJob.queue_adapter
-    adapter.define_singleton_method(:enqueue) { |*| raise ActiveJob::EnqueueError, "queue unavailable" }
+    adapter.define_singleton_method(:enqueue) { |*| raise error_class, "queue unavailable" }
     yield
   ensure
     adapter.singleton_class.remove_method(:enqueue)
