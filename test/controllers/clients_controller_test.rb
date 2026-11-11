@@ -82,13 +82,23 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Bob", client.reload.name
   end
 
-  test "update ignores a blank name and keeps the old one" do
+  test "update with a blank name re-renders the form with an error" do
     client = create_client
 
-    patch client_path(client), params: { client: { name: "" } }, headers: AUTH
+    patch client_path(client), params: { client: { name: "", email: "" } }, headers: AUTH
+
+    assert_response :unprocessable_entity
+    assert_select "form", text: /can't be blank/
+    assert_equal client.name, client.reload.name
+  end
+
+  test "update with a blank email clears the email" do
+    client = create_client(email: "alice-#{SecureRandom.hex(4)}@example.com")
+
+    patch client_path(client), params: { client: { name: client.name, email: "" } }, headers: AUTH
 
     assert_redirected_to clients_path
-    assert_equal client.name, client.reload.name
+    assert_nil client.reload.email
   end
 
   test "update with an email another client has does not save" do
