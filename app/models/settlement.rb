@@ -43,14 +43,15 @@ class Settlement < ApplicationRecord
   end
 
   def price_in_cents
-    positions.sum(:price_in_cents)
+    positions.loaded? ? positions.sum(&:price_in_cents) : positions.sum(:price_in_cents)
   end
 
+  # Records the send before enqueueing, so a failed save can't lead to a second mail on retry.
   def schedule_email_delivery
-    return false unless valid?(:email_delivery)
+    return false unless valid?(:email_delivery) && update(email_sent_at: Time.current)
 
     SettlementMailer.with(settlement: self).completed_mail.deliver_later
-    update(email_sent_at: Time.current)
+    true
   end
 
   private

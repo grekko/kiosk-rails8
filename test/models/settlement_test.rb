@@ -94,6 +94,27 @@ class SettlementTest < ActiveSupport::TestCase
     end
   end
 
+  test "schedule_email_delivery sends no mail when email_sent_at can't be saved" do
+    settlement = create_settlement
+    settlement.complete!
+    settlement.generated_at = 1.day.ago # locked once completed, so the save fails
+
+    assert_no_enqueued_emails do
+      assert_equal false, settlement.schedule_email_delivery
+    end
+    assert_nil settlement.reload.email_sent_at
+  end
+
+  test "price_in_cents runs no query when the positions are preloaded" do
+    settlement = create_settlement
+    drink = Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150)
+    settlement.positions.create!(drink:, amount: 2)
+
+    preloaded = Settlement.includes(:positions).find(settlement.id)
+
+    assert_no_queries { assert_equal 2 * 150, preloaded.price_in_cents }
+  end
+
   test "price_in_cents sums the positions" do
     settlement = create_settlement
     beer = Drink.create!(name: "Beer-#{SecureRandom.hex(4)}", price_in_cents: 150)
