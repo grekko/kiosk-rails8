@@ -21,7 +21,7 @@ bin/setup   # first time: install deps, prepare DB (a new development DB gets ma
 bin/dev     # start the server (Puma) at http://localhost:3050
 ```
 
-`bin/dev` loads `.env` and execs `bin/rails server`. Set the port via `PORT` in `.env` (defaults to `3050`).
+`bin/dev` loads `.env`, runs `bin/rails db:prepare` and execs `bin/rails server`. Set the port via `PORT` in `.env` (defaults to `3050`).
 
 Development and test have no admin login; only production asks for the basic auth login from the Rails credentials. The JSON API keeps its bearer token in development too.
 

@@ -4,4 +4,6 @@ require_relative "../lib/env_file"
 # Load a local .env (e.g. PORT) for the dev server.
 EnvFile.load(File.expand_path("../.env", __dir__))
 
+# Create, migrate and seed the database first, so a fresh checkout never serves PendingMigrationError.
+system("./bin/rails", "db:prepare", exception: true)
 exec "./bin/rails", "server", *ARGV
