@@ -127,8 +127,8 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
 
     patch complete_settlement_path(settlement), headers: AUTH
 
-    assert_redirected_to edit_settlement_path(settlement)
-    assert_equal "Only a draft settlement can be completed.", flash[:alert]
+    assert_redirected_to root_path
+    assert_match "cannot transition from 'completed'", flash[:alert]
     assert settlement.reload.completed?
   end
 
