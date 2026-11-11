@@ -29,6 +29,7 @@ class OrderPositionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_select "form[action=?]", order_positions_path(@order) do
       assert_select ".error", text: /can't be blank/
+      assert_select "input[name=?][value=?]", "order_position[deposit_in_cents]", "300"
     end
   end
 
