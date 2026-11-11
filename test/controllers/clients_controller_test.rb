@@ -1,0 +1,128 @@
+require "test_helper"
+
+class ClientsControllerTest < ActionDispatch::IntegrationTest
+  AUTH = BasicAuthHelpers::HEADERS
+
+  test "index lists clients" do
+    client = create_client
+
+    get clients_path, headers: AUTH
+
+    assert_response :success
+    assert_select "#clients", text: /#{client.name}/
+  end
+
+  test "index marks a suspended client" do
+    client = create_client
+    client.suspend!
+
+    get clients_path, headers: AUTH
+
+    assert_select "#clients tr.text-muted", text: /#{client.name}.*\(Suspended\)/m
+  end
+
+  test "new renders the form" do
+    get new_client_path, headers: AUTH
+
+    assert_response :success
+  end
+
+  test "edit renders the form" do
+    client = create_client
+
+    get edit_client_path(client), headers: AUTH
+
+    assert_response :success
+    assert_select "input[name=?][value=?]", "client[name]", client.name
+  end
+
+  test "create saves a client and redirects to the list" do
+    assert_difference -> { Client.count }, 1 do
+      post clients_path, params: { client: { name: "Alice", email: "alice-#{SecureRandom.hex(4)}@example.com" } }, headers: AUTH
+    end
+
+    assert_redirected_to clients_path
+    client = Client.last
+    assert_equal "Alice", client.name
+    assert_not_nil client.access_uuid
+  end
+
+  test "create without an email saves a client without one" do
+    assert_difference -> { Client.count }, 1 do
+      post clients_path, params: { client: { name: "Alice", email: "" } }, headers: AUTH
+    end
+
+    assert_nil Client.last.email
+  end
+
+  test "create without a name does not save" do
+    assert_no_difference -> { Client.count } do
+      post clients_path, params: { client: { name: "", email: "" } }, headers: AUTH
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "create with an email another client has does not save" do
+    other = create_client(email: "taken-#{SecureRandom.hex(4)}@example.com")
+
+    assert_no_difference -> { Client.count } do
+      post clients_path, params: { client: { name: "Alice", email: other.email } }, headers: AUTH
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "update changes the client" do
+    client = create_client
+
+    patch client_path(client), params: { client: { name: "Bob", email: "bob-#{SecureRandom.hex(4)}@example.com" } }, headers: AUTH
+
+    assert_redirected_to clients_path
+    assert_equal "Bob", client.reload.name
+  end
+
+  test "update ignores a blank name and keeps the old one" do
+    client = create_client
+
+    patch client_path(client), params: { client: { name: "" } }, headers: AUTH
+
+    assert_redirected_to clients_path
+    assert_equal client.name, client.reload.name
+  end
+
+  test "update with an email another client has does not save" do
+    client = create_client
+    other = create_client(email: "taken-#{SecureRandom.hex(4)}@example.com")
+
+    patch client_path(client), params: { client: { email: other.email } }, headers: AUTH
+
+    assert_response :unprocessable_entity
+    assert_nil client.reload.email
+  end
+
+  test "suspend marks the client suspended" do
+    client = create_client
+
+    patch suspend_client_path(client), headers: AUTH
+
+    assert_redirected_to clients_path
+    assert client.reload.suspended?
+  end
+
+  test "reinstate makes a suspended client active again" do
+    client = create_client
+    client.suspend!
+
+    patch reinstate_client_path(client), headers: AUTH
+
+    assert_redirected_to clients_path
+    assert_not client.reload.suspended?
+  end
+
+  private
+
+  def create_client(email: nil)
+    Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email:)
+  end
+end

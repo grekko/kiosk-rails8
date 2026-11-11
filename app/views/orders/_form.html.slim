@@ -33,4 +33,4 @@
   div class=(order.invoice.attached? ? "order-form__positions" : "")
     - if order.invoice.attached?
       embed src=order.invoice.url type="application/pdf" width="850" height="1200"
-    = render "order_positions/form", position: @positions
+    = render "order_positions/form", position: @position

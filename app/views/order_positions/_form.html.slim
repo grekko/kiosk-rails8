@@ -1,5 +1,5 @@
 ruby:
-  url = position ? order_position_path(@order, position) : order_positions_path(@order, position)
+  url = position&.persisted? ? order_position_path(@order, position) : order_positions_path(@order)
   position ||= :order_position
 
 = simple_form_for position, url: do |form|
