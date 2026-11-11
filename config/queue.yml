@@ -1,0 +1,5 @@
+production:
+  dispatchers:
+    - polling_interval: 1
+  workers:
+    - polling_interval: 1
