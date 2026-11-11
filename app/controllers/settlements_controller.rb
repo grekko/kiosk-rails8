@@ -42,6 +42,8 @@ class SettlementsController < ApplicationController
   end
 
   def complete
+    return redirect_to edit_settlement_path(@settlement), alert: "Only a draft settlement can be completed." unless @settlement.may_complete?
+
     @settlement.complete!
     redirect_to settlements_path
   end

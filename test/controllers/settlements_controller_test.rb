@@ -108,6 +108,17 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil settlement.completed_at
   end
 
+  test "complete refuses an already completed settlement" do
+    settlement = create_settlement
+    settlement.complete!
+
+    patch complete_settlement_path(settlement), headers: AUTH
+
+    assert_redirected_to edit_settlement_path(settlement)
+    assert_equal "Only a draft settlement can be completed.", flash[:alert]
+    assert settlement.reload.completed?
+  end
+
   test "edit offers Back to draft for a completed settlement" do
     settlement = create_settlement
     settlement.complete!
