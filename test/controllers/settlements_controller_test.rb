@@ -3,6 +3,7 @@ require "test_helper"
 class SettlementsControllerTest < ActionDispatch::IntegrationTest
   include ActionMailer::TestHelper
   include QueryCountHelpers
+  include SolidQueueHelpers
 
   AUTH = BasicAuthHelpers::HEADERS
 
@@ -243,6 +244,69 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to settlements_path
+  end
+
+  test "index marks a settlement whose email failed and offers a retry instead of a send" do
+    load_solid_queue_tables
+    failed = create_sendable_settlement
+    fail_settlement_email(failed, IOError.new("bad address"))
+    fine = create_sendable_settlement
+    other_mail = create_sendable_settlement
+    with_solid_queue { SettlementMailer.with(settlement: other_mail).opened_notification.deliver_later }
+    fail_last_job
+
+    get settlements_path, headers: AUTH
+
+    assert_response :success
+    assert_select ".email-failed", count: 1, text: /Email failed \(IOError\)/
+    assert_select "form[action=?]", retry_email_settlement_path(failed)
+    assert_select "form[action=?]", schedule_email_settlement_path(failed), count: 0
+    assert_select "form[action=?]", schedule_email_settlement_path(fine)
+    assert_select "form[action=?]", retry_email_settlement_path(fine), count: 0
+  end
+
+  test "index needs one queue query for any number of failed emails" do
+    load_solid_queue_tables
+    fail_settlement_email(create_sendable_settlement)
+    few = count_queries { get settlements_path, headers: AUTH }
+
+    3.times { fail_settlement_email(create_sendable_settlement) }
+    many = count_queries { get settlements_path, headers: AUTH }
+
+    assert_select ".email-failed", count: 4
+    assert_equal few, many
+  end
+
+  test "retry_email runs the failed job again without a second job or a new claim" do
+    load_solid_queue_tables
+    settlement = create_sendable_settlement
+    job = fail_settlement_email(settlement)
+    sent_at = settlement.reload.email_sent_at
+
+    assert_no_difference -> { SolidQueue::Job.count } do
+      patch retry_email_settlement_path(settlement), headers: AUTH
+    end
+
+    assert_redirected_to settlements_path
+    assert_equal "Email queued again.", flash[:notice]
+    assert_not SolidQueue::FailedExecution.exists?(job_id: job.id)
+    assert SolidQueue::ReadyExecution.exists?(job_id: job.id)
+    assert_equal sent_at, settlement.reload.email_sent_at
+
+    patch retry_email_settlement_path(settlement), headers: AUTH
+
+    assert_redirected_to settlements_path
+    assert_equal "There is no failed email to retry.", flash[:alert]
+    assert SolidQueue::ReadyExecution.exists?(job_id: job.id)
+  end
+
+  test "retry_email without solid_queue tables says there is nothing to retry" do
+    settlement = create_sendable_settlement
+
+    patch retry_email_settlement_path(settlement), headers: AUTH
+
+    assert_redirected_to settlements_path
+    assert_equal "There is no failed email to retry.", flash[:alert]
   end
 
   private

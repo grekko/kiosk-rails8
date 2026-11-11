@@ -72,6 +72,35 @@ class Settlement < ApplicationRecord
     false
   end
 
+  # Failed Settlement Email jobs, keyed by Settlement id, in one query. Empty where jobs don't run
+  # on Solid Queue (development and test have no solid_queue tables).
+  def self.failed_email_executions
+    failed = SolidQueue::FailedExecution
+    return {} unless failed.with_connection { |connection| connection.table_exists?(failed.table_name) }
+
+    failed.eager_load(:job)
+          .where(SolidQueue::Job.table_name => { class_name: "ActionMailer::MailDeliveryJob" })
+          .where("#{SolidQueue::Job.table_name}.arguments LIKE ?", "%completed_mail%")
+          .each_with_object({}) do |execution, by_settlement_id|
+            mailer, action, _delivery, options = execution.job.arguments["arguments"]
+            next unless mailer == "SettlementMailer" && action == "completed_mail"
+
+            settlement_id = GlobalID.parse(options.dig("params", "settlement", "_aj_globalid"))&.model_id
+            by_settlement_id[settlement_id.to_i] = execution if settlement_id
+          end
+  end
+
+  # Runs the failed job again under the same claim: no second job, email_sent_at stays.
+  def retry_failed_email
+    execution = Settlement.failed_email_executions[id]
+    return false unless execution
+
+    execution.retry
+    true
+  rescue ActiveRecord::RecordNotFound # a concurrent retry got there first
+    false
+  end
+
   private
 
   # Checks the stored state, so setting aasm_state back to draft in the same save can't unlock it.
