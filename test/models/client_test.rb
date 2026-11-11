@@ -22,6 +22,13 @@ class ClientTest < ActiveSupport::TestCase
     assert Client.new(name: "Dave").valid?
   end
 
+  test "stores a blank email as nil so several clients can have none" do
+    Client.create!(name: "Bob", email: "")
+    carol = Client.create!(name: "Carol", email: "  ")
+
+    assert_nil carol.email
+  end
+
   test "suspending and reinstating flips the active scope" do
     assert_includes Client.active, @client
 

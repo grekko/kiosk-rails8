@@ -5,6 +5,8 @@ class Client < ApplicationRecord
   scope :active, -> { where(suspended_at: nil) }
   scope :with_email, -> { where.not(email: nil) }
 
+  normalizes :email, with: ->(email) { email.strip.presence }
+
   before_create :set_access_uuid
 
   validates :name, presence: true
