@@ -39,7 +39,8 @@ Rails.application.configure do
 
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "kiosk.localhost", port: ENV.fetch("PORT", 3000).to_i }
-  config.action_mailer.delivery_method = :postmark
+  # Write mail to tmp/mails instead of sending it, so a local run never reaches a real Client.
+  config.action_mailer.delivery_method = :file
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
