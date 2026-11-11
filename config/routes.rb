@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   resources :drinks, except: %i[show destroy]
 
-  resources :clients, except: %i[destroy] do
+  resources :clients, except: %i[show destroy] do
     member do
       patch :suspend
       patch :reinstate
@@ -40,7 +40,7 @@ Rails.application.routes.draw do
   resources :payments, only: %i[index]
 
   resources :orders, except: %i[show destroy] do
-    resources :positions, controller: "order_positions", except: %i[index show destroy]
+    resources :positions, controller: "order_positions", only: %i[create edit update]
   end
 
   resources :monthly_reports, except: %i[show destroy] do
@@ -63,7 +63,7 @@ Rails.application.routes.draw do
       patch :schedule_email
     end
 
-    resources :positions, controller: "settlement_positions", except: %i[index show]
+    resources :positions, controller: "settlement_positions", only: %i[create edit update destroy]
   end
 
   resources :settlement_prices, except: %i[show destroy] do
