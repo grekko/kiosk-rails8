@@ -9,7 +9,6 @@ gem "puma", ">= 5.0"
 gem "importmap-rails" # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem "propshaft" # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "simple_form" # Rails forms made easy.
-gem "stimulus-rails" # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "turbo-rails" # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
 gem "slim-rails"
 gem "maildown" # Markdown for your ActionMailer-generated emails
