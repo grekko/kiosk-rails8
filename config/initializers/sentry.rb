@@ -8,8 +8,7 @@ Sentry.init do |config|
   config.release = ENV["KIOSK_SHA"]
   config.traces_sample_rate = 1.0
 
-  # Add data like request headers and IP for users: the gem's full defaults,
-  # which is what the deprecated `send_default_pii = true` produced (sentry-ruby
-  # 7.2), see https://docs.sentry.io/platforms/ruby/data-management/data-collected/
+  # Collect request headers, IP and user data. A fresh DataCollection holds the
+  # gem's full defaults; Sentry.init otherwise starts with a restricted one.
   config.data_collection = Sentry::DataCollection.new
 end
