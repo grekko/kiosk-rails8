@@ -1,19 +1,17 @@
 require "test_helper"
 
 class DrinksControllerTest < ActionDispatch::IntegrationTest
-  AUTH = BasicAuthHelpers::HEADERS
-
   test "index lists drinks" do
     drink = create_drink
 
-    get drinks_path, headers: AUTH
+    get drinks_path
 
     assert_response :success
     assert_select "#drinks", text: /#{drink.name}/
   end
 
   test "new renders the form" do
-    get new_drink_path, headers: AUTH
+    get new_drink_path
 
     assert_response :success
   end
@@ -21,7 +19,7 @@ class DrinksControllerTest < ActionDispatch::IntegrationTest
   test "edit renders the form" do
     drink = create_drink
 
-    get edit_drink_path(drink), headers: AUTH
+    get edit_drink_path(drink)
 
     assert_response :success
     assert_select "input[name=?][value=?]", "drink[name]", drink.name
@@ -29,7 +27,7 @@ class DrinksControllerTest < ActionDispatch::IntegrationTest
 
   test "create saves a drink and redirects to the list" do
     assert_difference -> { Drink.count }, 1 do
-      post drinks_path, params: { drink: { name: "Pils", price_in_cents: "150" } }, headers: AUTH
+      post drinks_path, params: { drink: { name: "Pils", price_in_cents: "150" } }
     end
 
     assert_redirected_to drinks_path
@@ -38,7 +36,7 @@ class DrinksControllerTest < ActionDispatch::IntegrationTest
 
   test "create without a name does not save" do
     assert_no_difference -> { Drink.count } do
-      post drinks_path, params: { drink: { name: "", price_in_cents: "150" } }, headers: AUTH
+      post drinks_path, params: { drink: { name: "", price_in_cents: "150" } }
     end
 
     assert_response :unprocessable_entity
@@ -46,7 +44,7 @@ class DrinksControllerTest < ActionDispatch::IntegrationTest
 
   test "create with a price that is no number does not save" do
     assert_no_difference -> { Drink.count } do
-      post drinks_path, params: { drink: { name: "Pils", price_in_cents: "abc" } }, headers: AUTH
+      post drinks_path, params: { drink: { name: "Pils", price_in_cents: "abc" } }
     end
 
     assert_response :unprocessable_entity
@@ -55,7 +53,7 @@ class DrinksControllerTest < ActionDispatch::IntegrationTest
   test "update changes the drink" do
     drink = create_drink
 
-    patch drink_path(drink), params: { drink: { name: "Helles", price_in_cents: "180" } }, headers: AUTH
+    patch drink_path(drink), params: { drink: { name: "Helles", price_in_cents: "180" } }
 
     assert_redirected_to drinks_path
     drink.reload
@@ -66,7 +64,7 @@ class DrinksControllerTest < ActionDispatch::IntegrationTest
   test "update without a price does not save" do
     drink = create_drink
 
-    patch drink_path(drink), params: { drink: { price_in_cents: "" } }, headers: AUTH
+    patch drink_path(drink), params: { drink: { price_in_cents: "" } }
 
     assert_response :unprocessable_entity
     assert_equal 150, drink.reload.price_in_cents

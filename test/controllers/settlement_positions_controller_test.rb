@@ -1,8 +1,6 @@
 require "test_helper"
 
 class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
-  AUTH = BasicAuthHelpers::HEADERS
-
   test "create prices the position from the settlement price valid on the settlement date" do
     settlement = create_settlement(generated_at: Date.new(2026, 1, 31))
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
@@ -10,7 +8,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     SettlementPrice.create!(drink:, price_in_cents: 999, valid_from: Date.new(2026, 2, 1))
 
     assert_difference -> { settlement.positions.count }, 1 do
-      post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 3 } }, headers: AUTH
+      post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 3 } }
     end
 
     assert_redirected_to edit_settlement_path(settlement)
@@ -21,7 +19,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     drink = Drink.create!(name: "Mate-#{SecureRandom.hex(4)}", price_in_cents: 220)
 
-    post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 2 } }, headers: AUTH
+    post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 2 } }
 
     assert_redirected_to edit_settlement_path(settlement)
     assert_equal 2 * 220, settlement.positions.sole.price_in_cents
@@ -31,7 +29,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     drink = Drink.create!(name: "Mate-#{SecureRandom.hex(4)}", price_in_cents: 220)
 
-    post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 1, price_in_cents: 1 } }, headers: AUTH
+    post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 1, price_in_cents: 1 } }
 
     assert_equal 220, settlement.positions.sole.price_in_cents
   end
@@ -41,7 +39,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
 
     assert_no_difference -> { SettlementPosition.count } do
-      post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: "" } }, headers: AUTH
+      post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: "" } }
     end
 
     assert_response :unprocessable_entity
@@ -51,7 +49,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     position = create_position(settlement)
 
-    get edit_settlement_position_path(settlement, position), headers: AUTH
+    get edit_settlement_position_path(settlement, position)
 
     assert_response :success
   end
@@ -60,7 +58,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     position = create_position(settlement, amount: 1, price_in_cents: 150)
 
-    patch settlement_position_path(settlement, position), params: { settlement_position: { amount: 4 } }, headers: AUTH
+    patch settlement_position_path(settlement, position), params: { settlement_position: { amount: 4 } }
 
     assert_redirected_to edit_settlement_path(settlement)
     assert_equal 4 * 150, position.reload.price_in_cents
@@ -70,7 +68,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     position = create_position(settlement, amount: 2)
 
-    patch settlement_position_path(settlement, position), params: { settlement_position: { amount: "" } }, headers: AUTH
+    patch settlement_position_path(settlement, position), params: { settlement_position: { amount: "" } }
 
     assert_response :unprocessable_entity
     assert_equal 2, position.reload.amount
@@ -81,7 +79,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     position = create_position(settlement)
 
     assert_difference -> { SettlementPosition.count }, -1 do
-      delete settlement_position_path(settlement, position), headers: AUTH
+      delete settlement_position_path(settlement, position)
     end
 
     assert_redirected_to edit_settlement_path(settlement)
@@ -93,7 +91,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
 
     assert_no_difference -> { settlement.positions.count } do
-      post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 1 } }, headers: AUTH
+      post settlement_positions_path(settlement), params: { settlement_position: { drink_id: drink.id, amount: 1 } }
     end
 
     assert_refused
@@ -104,7 +102,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     position = create_position(settlement, amount: 2)
     settlement.complete!
 
-    patch settlement_position_path(settlement, position), params: { settlement_position: { amount: 5 } }, headers: AUTH
+    patch settlement_position_path(settlement, position), params: { settlement_position: { amount: 5 } }
 
     assert_refused
     assert_equal 2, position.reload.amount
@@ -116,7 +114,7 @@ class SettlementPositionsControllerTest < ActionDispatch::IntegrationTest
     settlement.complete!
 
     assert_no_difference -> { SettlementPosition.count } do
-      delete settlement_position_path(settlement, position), headers: AUTH
+      delete settlement_position_path(settlement, position)
     end
 
     assert_refused

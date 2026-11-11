@@ -21,7 +21,14 @@ class ApplicationController < ActionController::Base
     Rails.application.credentials.basic_auth&.values_at(:username, :password)
   end
 
+  # Development and test have no login: the credentials holding it are only
+  # readable where config/master.key is. Tests stub this to check the login.
+  def self.basic_auth_required?
+    !Rails.env.local?
+  end
+
   def basic_auth
+    return unless self.class.basic_auth_required?
     return if authenticated_via_cookie?
     return if authenticate_with_http_basic { |user, password| handle_basic_auth(user, password) }
 

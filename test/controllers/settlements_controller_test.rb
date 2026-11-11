@@ -5,14 +5,13 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   include QueryCountHelpers
   include SolidQueueHelpers
 
-  AUTH = BasicAuthHelpers::HEADERS
 
   test "index runs the same number of queries for more settlements" do
     create_sendable_settlement
-    few = count_queries { get settlements_path, headers: AUTH }
+    few = count_queries { get settlements_path }
 
     3.times { create_sendable_settlement }
-    many = count_queries { get settlements_path, headers: AUTH }
+    many = count_queries { get settlements_path }
 
     assert_response :success
     assert_equal few, many
@@ -21,7 +20,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   test "index lists settlements" do
     settlement = create_settlement
 
-    get settlements_path, headers: AUTH
+    get settlements_path
 
     assert_response :success
     assert_select "#settlements", text: /#{settlement.client.name}/
@@ -31,7 +30,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     other = create_settlement
 
-    get filtered_settlements_path(client_id: settlement.client_id), headers: AUTH
+    get filtered_settlements_path(client_id: settlement.client_id)
 
     assert_response :success
     assert_select "#settlements", text: /#{settlement.client.name}/
@@ -39,7 +38,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "new renders the form" do
-    get new_settlement_path, headers: AUTH
+    get new_settlement_path
 
     assert_response :success
   end
@@ -50,7 +49,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     MonthlyReport.create!(title: "Dezember 2025")
     report = MonthlyReport.create!(title: "Januar 2026")
 
-    get new_settlement_path(client_id: client.id, monthly_report_id: report.id), headers: AUTH
+    get new_settlement_path(client_id: client.id, monthly_report_id: report.id)
 
     assert_response :success
     assert_select "#settlement_client_id option[selected][value=?]", client.id.to_s
@@ -62,7 +61,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
     SettlementPosition.create!(settlement:, drink:, amount: 2)
 
-    get edit_settlement_path(settlement), headers: AUTH
+    get edit_settlement_path(settlement)
 
     assert_response :success
     assert_select "#positions", text: /#{drink.name}/
@@ -73,7 +72,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     report = MonthlyReport.create!(title: "Januar 2026")
 
     assert_difference -> { Settlement.count }, 1 do
-      post settlements_path, params: { settlement: { client_id: client.id, monthly_report_id: report.id, generated_at: "2026-01-31" } }, headers: AUTH
+      post settlements_path, params: { settlement: { client_id: client.id, monthly_report_id: report.id, generated_at: "2026-01-31" } }
     end
 
     settlement = Settlement.last
@@ -88,7 +87,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     report = MonthlyReport.create!(title: "Januar 2026")
 
     assert_no_difference -> { Settlement.count } do
-      post settlements_path, params: { settlement: { client_id: client.id, monthly_report_id: report.id, generated_at: "" } }, headers: AUTH
+      post settlements_path, params: { settlement: { client_id: client.id, monthly_report_id: report.id, generated_at: "" } }
     end
 
     assert_response :unprocessable_entity
@@ -97,7 +96,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   test "update changes the settlement date" do
     settlement = create_settlement
 
-    patch settlement_path(settlement), params: { settlement: { generated_at: "2026-02-28" } }, headers: AUTH
+    patch settlement_path(settlement), params: { settlement: { generated_at: "2026-02-28" } }
 
     assert_redirected_to edit_settlement_path(settlement)
     assert_equal Date.new(2026, 2, 28), settlement.reload.generated_at.to_date
@@ -107,7 +106,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     generated_at = settlement.generated_at
 
-    patch settlement_path(settlement), params: { settlement: { generated_at: "" } }, headers: AUTH
+    patch settlement_path(settlement), params: { settlement: { generated_at: "" } }
 
     assert_response :unprocessable_entity
     assert_equal generated_at, settlement.reload.generated_at
@@ -117,7 +116,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     settlement.complete!
 
-    patch settlement_path(settlement), params: { settlement: { generated_at: "2026-02-28" } }, headers: AUTH
+    patch settlement_path(settlement), params: { settlement: { generated_at: "2026-02-28" } }
 
     assert_response :unprocessable_entity
     assert_includes response.body, "can no longer be changed once the settlement is completed"
@@ -127,7 +126,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   test "complete moves a draft settlement to completed" do
     settlement = create_settlement
 
-    patch complete_settlement_path(settlement), headers: AUTH
+    patch complete_settlement_path(settlement)
 
     assert_redirected_to settlements_path
     assert settlement.reload.completed?
@@ -138,7 +137,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     settlement.complete!
 
-    patch complete_settlement_path(settlement), headers: AUTH
+    patch complete_settlement_path(settlement)
 
     assert_redirected_to root_path
     assert_match "cannot transition from 'completed'", flash[:alert]
@@ -149,7 +148,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     settlement.complete!
 
-    get edit_settlement_path(settlement), headers: AUTH
+    get edit_settlement_path(settlement)
 
     assert_select "form[action=?] button", reopen_settlement_path(settlement), text: "Back to draft"
   end
@@ -159,7 +158,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement.complete!
     settlement.update!(email_sent_at: Time.current)
 
-    get edit_settlement_path(settlement), headers: AUTH
+    get edit_settlement_path(settlement)
 
     assert_select "form[action=?]", reopen_settlement_path(settlement), count: 0
   end
@@ -168,7 +167,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
     settlement.complete!
 
-    patch reopen_settlement_path(settlement), headers: AUTH
+    patch reopen_settlement_path(settlement)
 
     assert_redirected_to edit_settlement_path(settlement)
     assert_equal "Settlement moved back to draft.", flash[:notice]
@@ -181,7 +180,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement.complete!
     settlement.update!(email_sent_at: Time.current)
 
-    patch reopen_settlement_path(settlement), headers: AUTH
+    patch reopen_settlement_path(settlement)
 
     assert_redirected_to edit_settlement_path(settlement)
     assert_equal "A paid or emailed settlement can't be moved back to draft.", flash[:alert]
@@ -193,7 +192,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement.complete!
 
     assert_enqueued_emails 1 do
-      patch schedule_email_settlement_path(settlement), headers: AUTH
+      patch schedule_email_settlement_path(settlement)
     end
 
     assert_redirected_to settlements_path
@@ -205,7 +204,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement.complete!
 
     assert_no_enqueued_emails do
-      patch schedule_email_settlement_path(settlement), headers: AUTH
+      patch schedule_email_settlement_path(settlement)
     end
 
     assert_redirected_to settlements_path
@@ -217,7 +216,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement(client: Client.create!(name: "Alice-#{SecureRandom.hex(4)}", email: "alice@example.com"))
 
     assert_no_enqueued_emails do
-      patch schedule_email_settlement_path(settlement), headers: AUTH
+      patch schedule_email_settlement_path(settlement)
     end
 
     assert_redirected_to settlements_path
@@ -229,7 +228,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement = create_settlement
 
     assert_difference -> { Settlement.count }, -1 do
-      delete settlement_path(settlement), headers: AUTH
+      delete settlement_path(settlement)
     end
 
     assert_redirected_to settlements_path
@@ -240,7 +239,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     settlement.complete!
 
     assert_no_difference -> { Settlement.count } do
-      delete settlement_path(settlement), headers: AUTH
+      delete settlement_path(settlement)
     end
 
     assert_redirected_to settlements_path
@@ -255,7 +254,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     with_solid_queue { SettlementMailer.with(settlement: other_mail).opened_notification.deliver_later }
     fail_last_job
 
-    get settlements_path, headers: AUTH
+    get settlements_path
 
     assert_response :success
     assert_select ".email-failed", count: 1, text: /Email failed \(IOError\)/
@@ -268,10 +267,10 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   test "index needs one queue query for any number of failed emails" do
     load_solid_queue_tables
     fail_settlement_email(create_sendable_settlement)
-    few = count_queries { get settlements_path, headers: AUTH }
+    few = count_queries { get settlements_path }
 
     3.times { fail_settlement_email(create_sendable_settlement) }
-    many = count_queries { get settlements_path, headers: AUTH }
+    many = count_queries { get settlements_path }
 
     assert_select ".email-failed", count: 4
     assert_equal few, many
@@ -284,7 +283,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     sent_at = settlement.reload.email_sent_at
 
     assert_no_difference -> { SolidQueue::Job.count } do
-      patch retry_email_settlement_path(settlement), headers: AUTH
+      patch retry_email_settlement_path(settlement)
     end
 
     assert_redirected_to settlements_path
@@ -293,7 +292,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert SolidQueue::ReadyExecution.exists?(job_id: job.id)
     assert_equal sent_at, settlement.reload.email_sent_at
 
-    patch retry_email_settlement_path(settlement), headers: AUTH
+    patch retry_email_settlement_path(settlement)
 
     assert_redirected_to settlements_path
     assert_equal "There is no failed email to retry.", flash[:alert]
@@ -303,7 +302,7 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
   test "retry_email without solid_queue tables says there is nothing to retry" do
     settlement = create_sendable_settlement
 
-    patch retry_email_settlement_path(settlement), headers: AUTH
+    patch retry_email_settlement_path(settlement)
 
     assert_redirected_to settlements_path
     assert_equal "There is no failed email to retry.", flash[:alert]
