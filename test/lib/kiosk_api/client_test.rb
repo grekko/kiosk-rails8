@@ -78,6 +78,94 @@ class KioskApi::ClientTest < ActiveSupport::TestCase
     assert_equal "DELETE /api/settlements/42/positions/91 HTTP/1.1", request[:line]
   end
 
+  test "defaults to production when no url is set" do
+    client = KioskApi::Client.new(url: "", token: "x")
+
+    assert_equal "https://kiosk.grekko.de/api/", client.instance_variable_get(:@base_uri).to_s
+  end
+
+  test "a trailing slash on the url does not double the path separator" do
+    request = serve(body: { clients: [] }.to_json) do |url|
+      client("#{url}/").clients
+    end
+
+    assert_equal "GET /api/clients HTTP/1.1", request[:line]
+  end
+
+  test "update_position patches the nested position payload" do
+    request = serve(body: { position: { id: 91 } }.to_json) do |url|
+      client(url).update_position(42, 91, amount: 5)
+    end
+
+    assert_equal "PATCH /api/settlements/42/positions/91 HTTP/1.1", request[:line]
+    assert_equal({ "position" => { "amount" => 5 } }, JSON.parse(request[:body]))
+  end
+
+  test "settlements leaves unset filters out of the query" do
+    request = serve(body: { settlements: [] }.to_json) do |url|
+      client(url).settlements(client_id: 3)
+    end
+
+    assert_equal "GET /api/settlements?client_id=3 HTTP/1.1", request[:line]
+  end
+
+  test "update_settlement patches the given attributes" do
+    request = serve(body: { settlement: { id: 42 } }.to_json) do |url|
+      client(url).update_settlement(42, paid_at: "2026-02-01")
+    end
+
+    assert_equal "PATCH /api/settlements/42 HTTP/1.1", request[:line]
+    assert_equal({ "settlement" => { "paid_at" => "2026-02-01" } }, JSON.parse(request[:body]))
+  end
+
+  test "add_position posts the nested position payload" do
+    request = serve(status: 201, body: { position: { id: 91 } }.to_json) do |url|
+      assert_equal 91, client(url).add_position(42, drink_id: 7, amount: 3)["id"]
+    end
+
+    assert_equal "POST /api/settlements/42/positions HTTP/1.1", request[:line]
+    assert_equal({ "position" => { "drink_id" => 7, "amount" => 3 } }, JSON.parse(request[:body]))
+  end
+
+  test "monthly_report_image downloads the image without the token" do
+    image_request = serve(body: "PNGDATA") do |storage|
+      reports = { monthly_reports: [ { id: 4, image_url: "#{storage}/blob/x.png", image_filename: "x.png" } ] }
+
+      serve(body: reports.to_json) do |url|
+        assert_equal [ "x.png", "PNGDATA" ], client(url).monthly_report_image(4)
+      end
+    end
+
+    assert_equal "GET /blob/x.png HTTP/1.1", image_request[:line]
+    assert_nil image_request[:headers]["authorization"]
+  end
+
+  test "monthly_report_image follows a redirect to the storage service" do
+    serve(body: "PNGDATA") do |storage|
+      serve(status: 302, body: "", headers: { "Location" => "#{storage}/disk/x.png" }) do |blob|
+        reports = { monthly_reports: [ { id: 4, image_url: "#{blob}/blob/x.png", image_filename: "x.png" } ] }
+
+        serve(body: reports.to_json) do |url|
+          assert_equal [ "x.png", "PNGDATA" ], client(url).monthly_report_image(4)
+        end
+      end
+    end
+  end
+
+  test "monthly_report_image is nil when nothing is attached" do
+    serve(body: { monthly_reports: [ { id: 4, image_url: nil } ] }.to_json) do |url|
+      assert_nil client(url).monthly_report_image(4)
+    end
+  end
+
+  test "monthly_report_image raises for an unknown report" do
+    serve(body: { monthly_reports: [] }.to_json) do |url|
+      error = assert_raises(KioskApi::Error) { client(url).monthly_report_image(4) }
+
+      assert_match "No monthly report with id 4", error.message
+    end
+  end
+
   test "an error response is raised with status and error code" do
     body = { error: "validation_failed", message: "Client must have an email address" }.to_json
 
@@ -99,7 +187,7 @@ class KioskApi::ClientTest < ActiveSupport::TestCase
 
   # Serves exactly one request from a throwaway localhost server and returns
   # what the client sent, so the request shape can be asserted on.
-  def serve(status: 200, body: "{}")
+  def serve(status: 200, body: "{}", headers: {})
     server = TCPServer.new("127.0.0.1", 0)
     request = {}
 
@@ -110,7 +198,8 @@ class KioskApi::ClientTest < ActiveSupport::TestCase
       length = request[:headers]["content-length"].to_i
       request[:body] = length.positive? ? socket.read(length) : nil
 
-      socket.print("HTTP/1.1 #{status}\r\nContent-Type: application/json\r\n" \
+      extra = headers.map { |key, value| "#{key}: #{value}\r\n" }.join
+      socket.print("HTTP/1.1 #{status}\r\nContent-Type: application/json\r\n#{extra}" \
                    "Content-Length: #{body.bytesize}\r\nConnection: close\r\n\r\n#{body}")
       socket.close
     end

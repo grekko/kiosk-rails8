@@ -10,6 +10,11 @@ class ApplicationController < ActionController::Base
 
   before_action :basic_auth
 
+  # A stale page or double submit can fire a state change that no longer applies.
+  rescue_from AASM::InvalidTransition do |exception|
+    redirect_back_or_to root_path, alert: exception.message
+  end
+
   # Read through a class method so tests can stub it, as Api::BaseController
   # does for its token. Without `basic_auth` in the credentials nobody gets in.
   def self.basic_auth_credentials

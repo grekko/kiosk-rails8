@@ -31,6 +31,19 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new preselects the client and monthly report from the params" do
+    Client.create!(name: "Bob-#{SecureRandom.hex(4)}")
+    client = Client.create!(name: "Alice-#{SecureRandom.hex(4)}")
+    MonthlyReport.create!(title: "Dezember 2025")
+    report = MonthlyReport.create!(title: "Januar 2026")
+
+    get new_settlement_path(client_id: client.id, monthly_report_id: report.id), headers: AUTH
+
+    assert_response :success
+    assert_select "#settlement_client_id option[selected][value=?]", client.id.to_s
+    assert_select "#settlement_monthly_report_id option[selected][value=?]", report.id.to_s
+  end
+
   test "edit renders a draft settlement with its positions and total" do
     settlement = create_settlement
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
@@ -106,6 +119,17 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to settlements_path
     assert settlement.reload.completed?
     assert_not_nil settlement.completed_at
+  end
+
+  test "complete refuses an already completed settlement" do
+    settlement = create_settlement
+    settlement.complete!
+
+    patch complete_settlement_path(settlement), headers: AUTH
+
+    assert_redirected_to root_path
+    assert_match "cannot transition from 'completed'", flash[:alert]
+    assert settlement.reload.completed?
   end
 
   test "edit offers Back to draft for a completed settlement" do

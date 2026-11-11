@@ -128,12 +128,10 @@ module KioskApi
     end
 
     # Attachment URLs are signed and live outside /api, so they carry no token
-    # and may redirect once from the blob route to the storage service.
+    # and may redirect from the blob route to the storage service.
     def download(url, redirects_left = 3)
       uri = URI.parse(url)
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") do |http|
-        http.request(Net::HTTP::Get.new(uri))
-      end
+      response = perform(Net::HTTP::Get.new(uri))
 
       if response.is_a?(Net::HTTPRedirection) && redirects_left.positive?
         return download(URI.join(uri, response["location"]).to_s, redirects_left - 1)
@@ -149,14 +147,17 @@ module KioskApi
       params = query.compact
       uri.query = URI.encode_www_form(params) if params.any?
 
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") do |http|
-        http.request(build_request(type, uri, body))
-      end
+      response = perform(build_request(type, uri, body))
 
       parsed = response.body.to_s.empty? ? nil : JSON.parse(response.body)
       raise RequestError.new(response.code.to_i, parsed || response.body) unless response.is_a?(Net::HTTPSuccess)
 
       parsed
+    end
+
+    def perform(request)
+      uri = request.uri
+      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") { |http| http.request(request) }
     end
 
     def build_request(type, uri, body)
