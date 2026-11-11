@@ -31,6 +31,19 @@ class SettlementsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new preselects the client and monthly report from the params" do
+    Client.create!(name: "Bob-#{SecureRandom.hex(4)}")
+    client = Client.create!(name: "Alice-#{SecureRandom.hex(4)}")
+    MonthlyReport.create!(title: "Dezember 2025")
+    report = MonthlyReport.create!(title: "Januar 2026")
+
+    get new_settlement_path(client_id: client.id, monthly_report_id: report.id), headers: AUTH
+
+    assert_response :success
+    assert_select "#settlement_client_id option[selected][value=?]", client.id.to_s
+    assert_select "#settlement_monthly_report_id option[selected][value=?]", report.id.to_s
+  end
+
   test "edit renders a draft settlement with its positions and total" do
     settlement = create_settlement
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)

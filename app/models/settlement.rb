@@ -63,9 +63,7 @@ class Settlement < ApplicationRecord
   end
 
   def client_must_have_email
-    return true if client.email.present?
-
-    errors.add(:base, "Client must have an email address")
+    errors.add(:base, "Client must have an email address") if client.email.blank?
   end
 
   # A draft may still change and is hidden from the Client Page, so its email would link to nothing.
