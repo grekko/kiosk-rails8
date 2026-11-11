@@ -3,6 +3,8 @@
 Sentry.init do |config|
   config.breadcrumbs_logger = [ :active_support_logger, :http_logger ]
   config.dsn = ENV["SENTRY_DSN"]
+  # Only production reports, even if a local shell carries the DSN.
+  config.enabled_environments = %w[production]
   # Baked into the image at build time as the short git SHA, so Sentry can
   # attribute an error to the deploy it came from.
   config.release = ENV["KIOSK_SHA"]
