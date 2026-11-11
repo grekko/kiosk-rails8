@@ -1,14 +1,12 @@
 require "test_helper"
 
 class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
-  AUTH = BasicAuthHelpers::HEADERS
-
   test "index lists active prices only" do
     active = create_price(price_in_cents: 120)
     inactive = create_price(price_in_cents: 130)
     inactive.deactivate
 
-    get settlement_prices_path, headers: AUTH
+    get settlement_prices_path
 
     assert_response :success
     assert_select "#settlements", text: /#{active.drink.name}/
@@ -16,7 +14,7 @@ class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "new renders the form" do
-    get new_settlement_price_path, headers: AUTH
+    get new_settlement_price_path
 
     assert_response :success
   end
@@ -24,7 +22,7 @@ class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
   test "edit renders the form" do
     price = create_price
 
-    get edit_settlement_price_path(price), headers: AUTH
+    get edit_settlement_price_path(price)
 
     assert_response :success
   end
@@ -33,7 +31,7 @@ class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
 
     assert_difference -> { SettlementPrice.count }, 1 do
-      post settlement_prices_path, params: { settlement_price: { drink_id: drink.id, price_in_cents: 120, valid_from: "2026-01-01" } }, headers: AUTH
+      post settlement_prices_path, params: { settlement_price: { drink_id: drink.id, price_in_cents: 120, valid_from: "2026-01-01" } }
     end
 
     assert_redirected_to settlement_prices_path
@@ -46,7 +44,7 @@ class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
     drink = Drink.create!(name: "Pils-#{SecureRandom.hex(4)}", price_in_cents: 150)
 
     assert_no_difference -> { SettlementPrice.count } do
-      post settlement_prices_path, params: { settlement_price: { drink_id: drink.id, price_in_cents: "", valid_from: "2026-01-01" } }, headers: AUTH
+      post settlement_prices_path, params: { settlement_price: { drink_id: drink.id, price_in_cents: "", valid_from: "2026-01-01" } }
     end
 
     assert_response :unprocessable_entity
@@ -55,7 +53,7 @@ class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
   test "update changes the price" do
     price = create_price(price_in_cents: 120)
 
-    patch settlement_price_path(price), params: { settlement_price: { price_in_cents: 140 } }, headers: AUTH
+    patch settlement_price_path(price), params: { settlement_price: { price_in_cents: 140 } }
 
     assert_redirected_to settlement_prices_path
     assert_equal 140, price.reload.price_in_cents
@@ -64,7 +62,7 @@ class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
   test "update without a price does not save" do
     price = create_price(price_in_cents: 120)
 
-    patch settlement_price_path(price), params: { settlement_price: { price_in_cents: "" } }, headers: AUTH
+    patch settlement_price_path(price), params: { settlement_price: { price_in_cents: "" } }
 
     assert_response :unprocessable_entity
     assert_equal 120, price.reload.price_in_cents
@@ -73,7 +71,7 @@ class SettlementPricesControllerTest < ActionDispatch::IntegrationTest
   test "deactivate sets deactivated_at" do
     price = create_price
 
-    patch deactivate_settlement_price_path(price), headers: AUTH
+    patch deactivate_settlement_price_path(price)
 
     assert_redirected_to settlement_prices_path
     assert_not_nil price.reload.deactivated_at

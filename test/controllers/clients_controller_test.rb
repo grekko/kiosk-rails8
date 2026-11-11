@@ -3,15 +3,13 @@ require "test_helper"
 class ClientsControllerTest < ActionDispatch::IntegrationTest
   include QueryCountHelpers
 
-  AUTH = BasicAuthHelpers::HEADERS
-
   test "index runs the same number of queries for more settlements per client" do
     clients = [ create_client, create_client ]
     clients.each { |client| add_settlements(client, 1) }
-    few = count_queries { get clients_path, headers: AUTH }
+    few = count_queries { get clients_path }
 
     clients.each { |client| add_settlements(client, 3) }
-    many = count_queries { get clients_path, headers: AUTH }
+    many = count_queries { get clients_path }
 
     assert_response :success
     assert_equal few, many
@@ -20,7 +18,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   test "index lists clients" do
     client = create_client
 
-    get clients_path, headers: AUTH
+    get clients_path
 
     assert_response :success
     assert_select "#clients", text: /#{client.name}/
@@ -30,13 +28,13 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
     client = create_client
     client.suspend!
 
-    get clients_path, headers: AUTH
+    get clients_path
 
     assert_select "#clients tr.text-muted", text: /#{client.name}.*\(Suspended\)/m
   end
 
   test "new renders the form" do
-    get new_client_path, headers: AUTH
+    get new_client_path
 
     assert_response :success
   end
@@ -44,7 +42,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   test "edit renders the form" do
     client = create_client
 
-    get edit_client_path(client), headers: AUTH
+    get edit_client_path(client)
 
     assert_response :success
     assert_select "input[name=?][value=?]", "client[name]", client.name
@@ -52,7 +50,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
 
   test "create saves a client and redirects to the list" do
     assert_difference -> { Client.count }, 1 do
-      post clients_path, params: { client: { name: "Alice", email: "alice-#{SecureRandom.hex(4)}@example.com" } }, headers: AUTH
+      post clients_path, params: { client: { name: "Alice", email: "alice-#{SecureRandom.hex(4)}@example.com" } }
     end
 
     assert_redirected_to clients_path
@@ -63,7 +61,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
 
   test "create without an email saves a client without one" do
     assert_difference -> { Client.count }, 1 do
-      post clients_path, params: { client: { name: "Alice", email: "" } }, headers: AUTH
+      post clients_path, params: { client: { name: "Alice", email: "" } }
     end
 
     assert_nil Client.last.email
@@ -71,7 +69,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
 
   test "create without a name does not save" do
     assert_no_difference -> { Client.count } do
-      post clients_path, params: { client: { name: "", email: "" } }, headers: AUTH
+      post clients_path, params: { client: { name: "", email: "" } }
     end
 
     assert_response :unprocessable_entity
@@ -81,7 +79,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
     other = create_client(email: "taken-#{SecureRandom.hex(4)}@example.com")
 
     assert_no_difference -> { Client.count } do
-      post clients_path, params: { client: { name: "Alice", email: other.email } }, headers: AUTH
+      post clients_path, params: { client: { name: "Alice", email: other.email } }
     end
 
     assert_response :unprocessable_entity
@@ -90,7 +88,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   test "update changes the client" do
     client = create_client
 
-    patch client_path(client), params: { client: { name: "Bob", email: "bob-#{SecureRandom.hex(4)}@example.com" } }, headers: AUTH
+    patch client_path(client), params: { client: { name: "Bob", email: "bob-#{SecureRandom.hex(4)}@example.com" } }
 
     assert_redirected_to clients_path
     assert_equal "Bob", client.reload.name
@@ -99,7 +97,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   test "update with a blank name re-renders the form with an error" do
     client = create_client
 
-    patch client_path(client), params: { client: { name: "", email: "" } }, headers: AUTH
+    patch client_path(client), params: { client: { name: "", email: "" } }
 
     assert_response :unprocessable_entity
     assert_select "form", text: /can't be blank/
@@ -109,7 +107,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   test "update with a blank email clears the email" do
     client = create_client(email: "alice-#{SecureRandom.hex(4)}@example.com")
 
-    patch client_path(client), params: { client: { name: client.name, email: "" } }, headers: AUTH
+    patch client_path(client), params: { client: { name: client.name, email: "" } }
 
     assert_redirected_to clients_path
     assert_nil client.reload.email
@@ -119,7 +117,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
     client = create_client
     other = create_client(email: "taken-#{SecureRandom.hex(4)}@example.com")
 
-    patch client_path(client), params: { client: { email: other.email } }, headers: AUTH
+    patch client_path(client), params: { client: { email: other.email } }
 
     assert_response :unprocessable_entity
     assert_nil client.reload.email
@@ -128,7 +126,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
   test "suspend marks the client suspended" do
     client = create_client
 
-    patch suspend_client_path(client), headers: AUTH
+    patch suspend_client_path(client)
 
     assert_redirected_to clients_path
     assert client.reload.suspended?
@@ -138,7 +136,7 @@ class ClientsControllerTest < ActionDispatch::IntegrationTest
     client = create_client
     client.suspend!
 
-    patch reinstate_client_path(client), headers: AUTH
+    patch reinstate_client_path(client)
 
     assert_redirected_to clients_path
     assert_not client.reload.suspended?

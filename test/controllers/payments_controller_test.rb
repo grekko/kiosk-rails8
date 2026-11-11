@@ -1,13 +1,11 @@
 require "test_helper"
 
 class PaymentsControllerTest < ActionDispatch::IntegrationTest
-  AUTH = BasicAuthHelpers::HEADERS
-
   test "new renders the form prefilled with the outstanding amount" do
     client = Client.create!(name: "Payer-#{SecureRandom.hex(4)}")
     completed_settlement(client, 1000)
 
-    get new_client_payment_path(client), headers: AUTH
+    get new_client_payment_path(client)
 
     assert_response :success
     assert_select "input[name=?][value=?]", "payment[amount_in_cents]", "1000"
@@ -19,7 +17,7 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
     oldest = completed_settlement(client, 1000, report:, generated_at: 2.days.ago)
     newest = completed_settlement(client, 1000, report:, generated_at: 1.day.ago)
 
-    post client_payments_path(client), params: { payment: { amount_in_cents: 1000 } }, headers: AUTH
+    post client_payments_path(client), params: { payment: { amount_in_cents: 1000 } }
 
     assert_redirected_to clients_path
     assert oldest.reload.paid?
@@ -31,7 +29,7 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
     client = Client.create!(name: "Payer-#{SecureRandom.hex(4)}")
     completed_settlement(client, 1000)
 
-    post client_payments_path(client), params: { payment: { amount_in_cents: 500 } }, headers: AUTH
+    post client_payments_path(client), params: { payment: { amount_in_cents: 500 } }
 
     assert_response :unprocessable_entity
     assert_equal 0, client.payments.count

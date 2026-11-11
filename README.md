@@ -23,6 +23,8 @@ bin/dev     # start the server (Puma) at http://localhost:3050
 
 `bin/dev` loads `.env` and execs `bin/rails server`. Set the port via `PORT` in `.env` (defaults to `3050`).
 
+Development and test have no admin login; only production asks for the basic auth login from the Rails credentials. The JSON API keeps its bearer token in development too.
+
 ## JSON API
 
 Clients and the settlement workflow (create, update, complete, mail) are also available as an internal JSON API under `/api`, authenticated with a bearer token from the Rails credentials (`api.token`, falling back to `ENV["API_TOKEN"]`).
