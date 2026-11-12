@@ -17,11 +17,13 @@ In development, mail is written to `tmp/mails/` instead of being sent, and Sentr
 ## Run locally
 
 ```bash
-bin/setup   # first time: install deps, prepare DB (a new development DB gets made-up example data from db/seeds.rb; add it to an existing one with bin/rails db:seed)
+bin/setup   # first time: install deps, prepare DB (a new development DB gets made-up example data from db/seeds.rb)
 bin/dev     # start the server (Puma) at http://localhost:3050
 ```
 
 `bin/dev` loads `.env`, runs `bin/rails db:prepare` and execs `bin/rails server`. Set the port via `PORT` in `.env` (defaults to `3050`).
+
+The example data goes only into a development database without Drinks. If the server was started before `db:prepare`, the database isn't new any more, so `db:prepare` skips the seeds: run `bin/rails db:seed`.
 
 Development and test have no admin login; only production asks for the basic auth login from the Rails credentials. The JSON API keeps its bearer token in development too.
 

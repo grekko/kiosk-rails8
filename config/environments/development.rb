@@ -51,8 +51,10 @@ Rails.application.configure do
   # Highlight code that triggered database queries in logs.
   config.active_record.verbose_query_logs = true
 
-  # No query log tags: SQLite would keep their comment in the schema of every table a migration creates,
-  # so a migrated database would dump a different db/structure.sql than one loaded from it.
+  # Add comments with runtime information tags to SQL queries in logs, in front: SQLite keeps
+  # a trailing comment of ALTER TABLE ADD COLUMN in the stored schema, so db/structure.sql would change.
+  config.active_record.query_log_tags_enabled = true
+  config.active_record.query_log_tags_prepend_comment = true
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true

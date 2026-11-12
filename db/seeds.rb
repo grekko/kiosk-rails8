@@ -6,7 +6,7 @@ return if Drink.exists?
 ActiveRecord::Base.transaction do
   month = Date.current.prev_month.beginning_of_month
 
-  # name => [purchase price, selling price], in cents
+  # name => [default price, Settlement Price], in cents; the Order adds 8 cents deposit per bottle
   drinks = { "Pils" => [ 80, 120 ], "Radler" => [ 85, 130 ], "Mate" => [ 90, 150 ], "Wasser" => [ 30, 60 ] }.to_h do |name, (purchase, selling)|
     drink = Drink.create!(name:, price_in_cents: purchase)
     drink.settlement_prices.create!(valid_from: month, price_in_cents: selling)
