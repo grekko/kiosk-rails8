@@ -28,7 +28,9 @@ jobs:
 
       - name: Resolve SHA
         id: sha
-        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "full=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Join tailnet
         uses: tailscale/github-action@v4
@@ -60,7 +62,17 @@ jobs:
         working-directory: dsm
         env:
           SHA: ${{ steps.sha.outputs.sha }}
+          FULL_SHA: ${{ steps.sha.outputs.full }}
         run: |
+          # Runs can finish out of order when PRs merge minutes apart; only the
+          # tip of main may pin, so a slower run for an older commit can't roll
+          # production back. Checked here, right before the push, not earlier.
+          MAIN_SHA="$(git -C "$GITHUB_WORKSPACE" ls-remote origin refs/heads/main | cut -f1)"
+          [ -n "$MAIN_SHA" ] || { echo "Could not read the tip of main" >&2; exit 1; }
+          if [ "$MAIN_SHA" != "$FULL_SHA" ]; then
+            echo "::notice::Skipping pin: $SHA is not the tip of main (${MAIN_SHA:0:7}); not pinning, so this run can't roll production back."
+            exit 0
+          fi
           ENV_PATH=portainer-stacks/kiosk/.env
           grep -q '^KIOSK_TAG=' "$ENV_PATH" || { echo "No KIOSK_TAG line in $ENV_PATH" >&2; exit 1; }
           if grep -q "^KIOSK_TAG=$SHA\$" "$ENV_PATH"; then

@@ -30,9 +30,9 @@ The SHA is also baked into the image as `KIOSK_SHA` and reported to Sentry as th
 2. checks out the exact commit CI went green on — not the branch head, which may already have moved,
 3. joins the tailnet via a Tailscale OAuth client tagged `tag:ci`, which is how the runner reaches the NAS registry at all,
 4. builds and pushes `kiosk:<sha>` and `kiosk:latest`,
-5. bumps `KIOSK_TAG` in the stack repo's `.env` and pushes.
+5. checks that its commit is still the tip of `main`, then bumps `KIOSK_TAG` in the stack repo's `.env` and pushes.
 
-`concurrency: deploy` serialises runs so two merges in quick succession can't race to pin the tag.
+Only the tip of `main` pins. Runs for merges minutes apart can finish out of order, because `concurrency: deploy` runs deploys one at a time in event order, not commit order. A run whose commit is no longer the tip logs `Skipping pin: …` as a notice in the run summary and exits 0, so it can't roll production back. If the tip's CI fails, nothing deploys until `main` is green again.
 
 It can also be triggered by hand from the Actions tab (`workflow_dispatch`), which skips the CI gate and deploys whatever is on `main`.
 
