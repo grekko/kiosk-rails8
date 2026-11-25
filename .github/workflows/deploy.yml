@@ -70,7 +70,7 @@ jobs:
           MAIN_SHA="$(git -C "$GITHUB_WORKSPACE" ls-remote origin refs/heads/main | cut -f1)"
           [ -n "$MAIN_SHA" ] || { echo "Could not read the tip of main" >&2; exit 1; }
           if [ "$MAIN_SHA" != "$FULL_SHA" ]; then
-            echo "Skipping pin: $SHA is not the tip of main (${MAIN_SHA:0:7}); not pinning, so this run can't roll production back."
+            echo "::notice::Skipping pin: $SHA is not the tip of main (${MAIN_SHA:0:7}); not pinning, so this run can't roll production back."
             exit 0
           fi
           ENV_PATH=portainer-stacks/kiosk/.env
